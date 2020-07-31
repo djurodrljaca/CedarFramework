@@ -177,6 +177,11 @@ QJsonValue serialize(const QString &value)
 template<>
 QJsonValue serialize(const QByteArray &value)
 {
+    if (value.isEmpty())
+    {
+        return QString();
+    }
+
     return QString::fromLatin1(value.toBase64());
 }
 
@@ -657,51 +662,20 @@ QJsonValue serialize(const QLocale &value)
 template<>
 QJsonValue serialize(const QRegExp &value)
 {
-    QString syntax;
-
-    switch (value.patternSyntax())
+    static const QHash<QRegExp::PatternSyntax, QString> syntaxMap =
     {
-        case QRegExp::RegExp:
-        {
-            syntax = QStringLiteral("RegExp");
-            break;
-        }
-
-        case QRegExp::RegExp2:
-        {
-            syntax = QStringLiteral("RegExp2");
-            break;
-        }
-
-        case QRegExp::Wildcard:
-        {
-            syntax = QStringLiteral("Wildcard");
-            break;
-        }
-
-        case QRegExp::WildcardUnix:
-        {
-            syntax = QStringLiteral("WildcardUnix");
-            break;
-        }
-
-        case QRegExp::FixedString:
-        {
-            syntax = QStringLiteral("FixedString");
-            break;
-        }
-
-        case QRegExp::W3CXmlSchema11:
-        {
-            syntax = QStringLiteral("W3CXmlSchema11");
-            break;
-        }
-    }
+        { QRegExp::RegExp,         QStringLiteral("RegExp") },
+        { QRegExp::RegExp2,        QStringLiteral("RegExp2") },
+        { QRegExp::Wildcard,       QStringLiteral("Wildcard") },
+        { QRegExp::WildcardUnix,   QStringLiteral("WildcardUnix") },
+        { QRegExp::FixedString,    QStringLiteral("FixedString") },
+        { QRegExp::W3CXmlSchema11, QStringLiteral("W3CXmlSchema11") }
+    };
 
     return QJsonObject {
         { QStringLiteral("pattern"),        value.pattern() },
         { QStringLiteral("case_sensitive"), (value.caseSensitivity() == Qt::CaseSensitive) },
-        { QStringLiteral("syntax"),         syntax }
+        { QStringLiteral("syntax"),         syntaxMap.value(value.patternSyntax()) }
     };
 }
 

@@ -18,8 +18,7 @@
  * Contains methods used for serialization of a value to JSON
  */
 
-#ifndef CEDARFRAMEWORK_SERIALIZATION_HPP
-#define CEDARFRAMEWORK_SERIALIZATION_HPP
+#pragma once
 
 // Cedar Framework includes
 #include <CedarFramework/LoggingCategories.hpp>
@@ -53,19 +52,6 @@ namespace CedarFramework
  */
 template<typename T>
 QJsonValue serialize(const T &value);
-
-/*!
- * Helper method for conversion of the value that is already serialized to JSON to a string so that
- * it can be used as a key in a JSON object
- *
- * \param   value   Value of the key serialized to JSON
- *
- * \return  String representation of the key
- *
- * \note    This method accepts only the values that are serialized either to a 'Double' or 'String'
- *          JSON types!
- */
-QString serializeKey(const QJsonValue &value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
@@ -735,5 +721,3 @@ QString serializeKey(const T &value, bool *ok)
 }
 
 } // namespace CedarFramework
-
-#endif // CEDARFRAMEWORK_LOGGINGCATEGORIES_HPP

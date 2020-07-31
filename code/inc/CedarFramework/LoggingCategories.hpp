@@ -18,8 +18,7 @@
  * Contains logging categories
  */
 
-#ifndef CEDARFRAMEWORK_LOGGINGCATEGORIES_HPP
-#define CEDARFRAMEWORK_LOGGINGCATEGORIES_HPP
+#pragma once
 
 // Cedar Framework includes
 #include <CedarFramework/CedarFrameworkExport.hpp>
@@ -41,11 +40,12 @@ namespace CedarFramework
 namespace LoggingCategory
 {
 
+//! Logging category for deserialization
+CEDARFRAMEWORK_EXPORT extern const QLoggingCategory Deserialization;
+
 //! Logging category for serialization
 CEDARFRAMEWORK_EXPORT extern const QLoggingCategory Serialization;
 
 } // namespace LoggingCategory
 
 } // namespace CedarFramework
-
-#endif // CEDARFRAMEWORK_LOGGINGCATEGORIES_HPP

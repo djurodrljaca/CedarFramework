@@ -39,6 +39,7 @@ namespace CedarFramework
 namespace LoggingCategory
 {
 
+const QLoggingCategory Deserialization("CedarFramework.Deserialization");
 const QLoggingCategory Serialization("CedarFramework.Serialization");
 
 } // namespace LoggingCategory
