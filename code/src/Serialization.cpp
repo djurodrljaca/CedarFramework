@@ -470,82 +470,50 @@ QJsonValue serialize(const QVariant &value)
 
         case QMetaType::QJsonValue:
         {
-            return value.value<QJsonValue>();
+            return serialize(value.value<QJsonValue>());
         }
 
         case QMetaType::QJsonArray:
         {
-            return value.value<QJsonArray>();
+            return serialize(value.value<QJsonArray>());
         }
 
         case QMetaType::QJsonObject:
         {
-            return value.value<QJsonObject>();
+            return serialize(value.value<QJsonObject>());
         }
 
         case QMetaType::QJsonDocument:
         {
-            const auto doc = value.value<QJsonDocument>();
-
-            if (doc.isNull())
-            {
-                return QJsonValue::Null;
-            }
-
-            if (doc.isArray())
-            {
-                return doc.array();
-            }
-
-            if (doc.isObject())
-            {
-                return doc.object();
-            }
-
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Failed to serialize QJsonDocument");
-            return QJsonValue::Undefined;
+            return serialize(value.value<QJsonDocument>());
         }
 
         case QMetaType::QCborValue:
         {
-            return value.value<QCborValue>().toJsonValue();
+            return serialize(value.value<QCborValue>());
         }
 
         case QMetaType::QCborArray:
         {
-            return value.value<QCborArray>().toJsonArray();
+            return serialize(value.value<QCborArray>());
         }
 
         case QMetaType::QCborMap:
         {
-            return value.value<QCborMap>().toJsonObject();
+            return serialize(value.value<QCborMap>());
         }
 
         case QMetaType::QCborSimpleType:
         {
-            switch (value.value<QCborSimpleType>())
-            {
-                case QCborSimpleType::False:
-                {
-                    return false;
-                }
+            return serialize(value.value<QCborSimpleType>());
+        }
 
-                case QCborSimpleType::True:
-                {
-                    return true;
-                }
-
-                case QCborSimpleType::Null:
-                {
-                    return QJsonValue::Null;
-                }
-
-                case QCborSimpleType::Undefined:
-                {
-                    return QJsonValue::Undefined;
-                }
-            }
+        // Note: QVariant cannot be wrapped in another QVariant!
+        case QMetaType::QVariant:
+        {
+            qCWarning(CedarFramework::LoggingCategory::Serialization)
+                    << QStringLiteral("Cannot serialize a QVariant wrapped in another QVariant");
+            return QJsonValue::Undefined;
         }
 
         // TODO: add support for Qt GUI types?
@@ -575,44 +543,12 @@ QJsonValue serialize(const QVariant &value)
         case QMetaType::QVector2D:
         case QMetaType::QVector3D:
         case QMetaType::QVector4D:
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QString("Unsupported GUI QVariant type: %1 (%2)")
-                       .arg(value.userType())
-                       .arg(value.typeName());
-            return QJsonValue::Undefined;
-        }
 
         // TODO: add support for Qt Widgets types?
         case QMetaType::QSizePolicy:
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QString("Unsupported Widgets QVariant type: %1 (%2)")
-                       .arg(value.userType())
-                       .arg(value.typeName());
-            return QJsonValue::Undefined;
-        }
 
         // TODO: add support for handling user types?
-        // TODO: make it possible to register serialization of custom QVariant types?
-        // TODO: change the whole QVariant serialization to support "add-ons" which could register
-        //       additional serializers?
         case QMetaType::User:
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QString("Unsupported user QVariant type: %1 (%2)")
-                       .arg(value.userType())
-                       .arg(value.typeName());
-            return QJsonValue::Undefined;
-        }
-
-        // Note: QVariant cannot be wrapped in another QVariant!
-        case QMetaType::QVariant:
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Cannot serialize a QVariant wrapped in another QVariant");
-            return QJsonValue::Undefined;
-        }
 
         // Note: these values cannot be serialized to JSON!
         case QMetaType::QEasingCurve:
@@ -844,6 +780,102 @@ template<>
 QJsonValue serialize(const QStringList &value)
 {
     return QJsonArray::fromStringList(value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QJsonValue &value)
+{
+    return value;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QJsonArray &value)
+{
+    return value;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QJsonObject &value)
+{
+    return value;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QJsonDocument &value)
+{
+    if (value.isArray())
+    {
+        return value.array();
+    }
+
+    if (value.isObject())
+    {
+        return value.object();
+    }
+
+    return QJsonValue::Null;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QCborValue &value)
+{
+    return value.toJsonValue();
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QCborArray &value)
+{
+    return value.toJsonArray();
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QCborMap &value)
+{
+    return value.toJsonObject();
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const QCborSimpleType &value)
+{
+    switch (value)
+    {
+        case QCborSimpleType::False:
+        {
+            return false;
+        }
+
+        case QCborSimpleType::True:
+        {
+            return true;
+        }
+
+        case QCborSimpleType::Null:
+        {
+            return QJsonValue::Null;
+        }
+
+        case QCborSimpleType::Undefined:
+        default:
+        {
+            return QJsonValue::Undefined;
+        }
+    }
 }
 
 } // namespace CedarFramework

@@ -223,7 +223,7 @@ bool deserializeIntegerValue(const QJsonValue inputValue, T_OUT *outputValue)
     }
 
     qCWarning(CedarFramework::LoggingCategory::Deserialization)
-            << QString("JSON value is not a valid integer!");
+            << QStringLiteral("JSON value is not a valid integer:") << inputValue;
     return false;
 }
 
@@ -332,6 +332,8 @@ bool deserialize(const QJsonValue &json, bool *value)
         return false;
     }
 
+    qCWarning(CedarFramework::LoggingCategory::Deserialization)
+            << QStringLiteral("JSON value is not a valid Boolean value:") << json;
     return false;
 }
 
@@ -443,7 +445,7 @@ bool deserialize(const QJsonValue &json, float *value)
     }
 
     qCWarning(CedarFramework::LoggingCategory::Deserialization)
-            << QStringLiteral("JSON value is not a valid floating-point number!");
+            << QStringLiteral("JSON value is not a valid floating-point number:") << json;
     return false;
 }
 
@@ -475,7 +477,7 @@ bool deserialize(const QJsonValue &json, double *value)
     }
 
     qCWarning(CedarFramework::LoggingCategory::Deserialization)
-            << QStringLiteral("JSON value is not a valid floating-point number!");
+            << QStringLiteral("JSON value is not a valid floating-point number:") << json;
     return false;
 }
 
@@ -489,7 +491,7 @@ bool deserialize(const QJsonValue &json, QChar *value)
     if (!json.isString())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not a valid character!");
+                << QStringLiteral("JSON value is not a valid character:") << json;
         return false;
     }
 
@@ -498,7 +500,7 @@ bool deserialize(const QJsonValue &json, QChar *value)
     if (stringValue.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value contains more than one character!");
+                << QStringLiteral("JSON value contains more than one character:") << stringValue;
         return false;
     }
 
@@ -516,7 +518,7 @@ bool deserialize(const QJsonValue &json, QString *value)
     if (!json.isString())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not a string!");
+                << QStringLiteral("JSON value is not a string:") << json;
         return false;
     }
 
@@ -534,7 +536,7 @@ bool deserialize(const QJsonValue &json, QByteArray *value)
     if (!json.isString())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not a string!");
+                << QStringLiteral("JSON value is not a valid byte array:") << json;
         return false;
     }
 
@@ -551,7 +553,7 @@ bool deserialize(const QJsonValue &json, QByteArray *value)
     if (value->isEmpty())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not a string!");
+                << QStringLiteral("JSON value is not a valid byte array:") << json;
         return false;
     }
 
@@ -569,7 +571,7 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid bit array:") << json;
         return false;
     }
 
@@ -578,8 +580,9 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A bit array needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A bit array needs to have exactly 2 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -589,7 +592,8 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
     if (!deserialize(jsonObject.value(QStringLiteral("bit_count")), &bitCount))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'bit_count' of a bit array");
+                << QStringLiteral("Failed to deserialize the member 'bit_count' of a bit array:")
+                << jsonObject;
         return false;
     }
 
@@ -598,7 +602,8 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
     if (!deserialize(jsonObject.value(QStringLiteral("encoded_bits")), &bitCount))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'encoded_bits' of a bit array");
+                << QStringLiteral("Failed to deserialize the member 'encoded_bits' of a bit array:")
+                << jsonObject;
         return false;
     }
 
@@ -614,10 +619,11 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("The 'bit_count' [%1] doesn't correspond to the size of 'encoded_bits' "
-                           "[%2] of a bit array. Expected size was [%3]")
+                           "[%2] of a bit array. Expected size was [%3]! JSON value:")
                    .arg(bitCount)
                    .arg(encodedBits.size())
-                   .arg(byteCount);
+                   .arg(byteCount)
+                << jsonObject;
         return false;
     }
 
@@ -700,12 +706,15 @@ template<>
 bool deserialize(const QJsonValue &json, QDate *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid date:") << json;
         return false;
     }
+
+    const QString stringValue = json.toString();
 
     if (stringValue.isEmpty())
     {
@@ -732,12 +741,15 @@ template<>
 bool deserialize(const QJsonValue &json, QTime *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid time:") << json;
         return false;
     }
+
+    const QString stringValue = json.toString();
 
     if (stringValue.isEmpty())
     {
@@ -764,12 +776,15 @@ template<>
 bool deserialize(const QJsonValue &json, QDateTime *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid date and time:") << json;
         return false;
     }
+
+    const QString stringValue = json.toString();
 
     if (stringValue.isEmpty())
     {
@@ -807,12 +822,15 @@ template<>
 bool deserialize(const QJsonValue &json, QUrl *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid URL:") << json;
         return false;
     }
+
+    const QString stringValue = json.toString();
 
     value->setUrl(stringValue);
 
@@ -833,12 +851,15 @@ template<>
 bool deserialize(const QJsonValue &json, QUuid *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid UUID:") << json;
         return false;
     }
+
+    const QString stringValue = json.toString();
 
     *value = QUuid::fromString(stringValue);
 
@@ -859,14 +880,15 @@ template<>
 bool deserialize(const QJsonValue &json, QLocale *value)
 {
     Q_ASSERT(value != nullptr);
-    QString stringValue;
 
-    if (!deserialize(json, &stringValue))
+    if (!json.isString())
     {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid locale:") << json;
         return false;
     }
 
-    *value = QLocale(stringValue);
+    *value = QLocale(json.toString());
     return true;
 }
 
@@ -881,7 +903,7 @@ bool deserialize(const QJsonValue &json, QRegExp *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid QRegExp:") << json;
         return false;
     }
 
@@ -890,8 +912,9 @@ bool deserialize(const QJsonValue &json, QRegExp *value)
     if (jsonObject.size() != 3)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A QRegExp needs to have exactly three members but this one has:")
-                << jsonObject.size();
+                << QString("A QRegExp needs to have exactly 3 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -901,7 +924,8 @@ bool deserialize(const QJsonValue &json, QRegExp *value)
     if (!deserialize(jsonObject.value(QStringLiteral("pattern")), &pattern))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'pattern' of a QRegExp");
+                << QStringLiteral("Failed to deserialize the member 'pattern' of a QRegExp:")
+                << jsonObject;
         return false;
     }
 
@@ -910,7 +934,8 @@ bool deserialize(const QJsonValue &json, QRegExp *value)
     if (!deserialize(jsonObject.value(QStringLiteral("case_sensitive")), &caseSensitive))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'case_sensitive' of a QRegExp");
+                << QStringLiteral("Failed to deserialize the member 'case_sensitive' of a QRegExp:")
+                << jsonObject;
         return false;
     }
 
@@ -919,7 +944,8 @@ bool deserialize(const QJsonValue &json, QRegExp *value)
     if (!deserialize(jsonObject.value(QStringLiteral("syntax")), &syntax))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'syntax' of a QRegExp");
+                << QStringLiteral("Failed to deserialize the member 'syntax' of a QRegExp:")
+                << jsonObject;
         return false;
     }
 
@@ -958,7 +984,7 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid QRegularExpression:") << json;
         return false;
     }
 
@@ -967,9 +993,9 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A QRegularExpression needs to have exactly two members but this "
-                                  "one has:")
-                << jsonObject.size();
+                << QString("A QRegularExpression needs to have exactly 2 members but this one has "
+                           "%1! JSON value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -980,7 +1006,8 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("Failed to deserialize the member 'pattern' of a "
-                                  "QRegularExpression");
+                                  "QRegularExpression:")
+                << jsonObject;
         return false;
     }
 
@@ -990,7 +1017,8 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("Failed to deserialize the member 'options' of a "
-                                  "QRegularExpression");
+                                  "QRegularExpression:")
+                << jsonObject;
         return false;
     }
 
@@ -1043,7 +1071,7 @@ bool deserialize(const QJsonValue &json, QSize *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid size:") << json;
         return false;
     }
 
@@ -1052,8 +1080,9 @@ bool deserialize(const QJsonValue &json, QSize *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A size needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A size needs to have exactly 2 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1063,7 +1092,8 @@ bool deserialize(const QJsonValue &json, QSize *value)
     if (!deserialize(jsonObject.value(QStringLiteral("width")), &width))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'width' of a size");
+                << QStringLiteral("Failed to deserialize the member 'width' of a size:")
+                << jsonObject;
         return false;
     }
 
@@ -1072,7 +1102,8 @@ bool deserialize(const QJsonValue &json, QSize *value)
     if (!deserialize(jsonObject.value(QStringLiteral("height")), &height))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'height' of a size");
+                << QStringLiteral("Failed to deserialize the member 'height' of a size:")
+                << jsonObject;
         return false;
     }
 
@@ -1092,7 +1123,7 @@ bool deserialize(const QJsonValue &json, QSizeF *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid size:") << json;
         return false;
     }
 
@@ -1101,8 +1132,9 @@ bool deserialize(const QJsonValue &json, QSizeF *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A size needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A size needs to have exactly 2 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1112,7 +1144,8 @@ bool deserialize(const QJsonValue &json, QSizeF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("width")), &width))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'width' of a size");
+                << QStringLiteral("Failed to deserialize the member 'width' of a size:")
+                << jsonObject;
         return false;
     }
 
@@ -1121,7 +1154,8 @@ bool deserialize(const QJsonValue &json, QSizeF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("height")), &height))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'height' of a size");
+                << QStringLiteral("Failed to deserialize the member 'height' of a size:")
+                << jsonObject;
         return false;
     }
 
@@ -1141,7 +1175,7 @@ bool deserialize(const QJsonValue &json, QPoint *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid point:") << json;
         return false;
     }
 
@@ -1150,8 +1184,9 @@ bool deserialize(const QJsonValue &json, QPoint *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A point needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A point needs to have exactly 2 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1161,7 +1196,8 @@ bool deserialize(const QJsonValue &json, QPoint *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x")), &x))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x' of a point");
+                << QStringLiteral("Failed to deserialize the member 'x' of a point:")
+                << jsonObject;
         return false;
     }
 
@@ -1170,7 +1206,8 @@ bool deserialize(const QJsonValue &json, QPoint *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y")), &y))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y' of a point");
+                << QStringLiteral("Failed to deserialize the member 'y' of a point:")
+                << jsonObject;
         return false;
     }
 
@@ -1190,7 +1227,7 @@ bool deserialize(const QJsonValue &json, QPointF *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid point:") << json;
         return false;
     }
 
@@ -1199,8 +1236,9 @@ bool deserialize(const QJsonValue &json, QPointF *value)
     if (jsonObject.size() != 2)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A point needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A point needs to have exactly 2 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1210,7 +1248,8 @@ bool deserialize(const QJsonValue &json, QPointF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x")), &x))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x' of a point");
+                << QStringLiteral("Failed to deserialize the member 'x' of a point:")
+                << jsonObject;
         return false;
     }
 
@@ -1219,7 +1258,8 @@ bool deserialize(const QJsonValue &json, QPointF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y")), &y))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y' of a point");
+                << QStringLiteral("Failed to deserialize the member 'y' of a point:")
+                << jsonObject;
         return false;
     }
 
@@ -1239,7 +1279,7 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid line:") << json;
         return false;
     }
 
@@ -1248,8 +1288,9 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (jsonObject.size() != 4)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A line needs to have exactly four members but this one has:")
-                << jsonObject.size();
+                << QString("A line needs to have exactly 4 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1259,7 +1300,8 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x1")), &x1))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x1' of a line");
+                << QStringLiteral("Failed to deserialize the member 'x1' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1268,7 +1310,8 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x2")), &x2))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x2' of a line");
+                << QStringLiteral("Failed to deserialize the member 'x2' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1277,7 +1320,8 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y1")), &y1))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y1' of a line");
+                << QStringLiteral("Failed to deserialize the member 'y1' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1286,7 +1330,8 @@ bool deserialize(const QJsonValue &json, QLine *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y2")), &y2))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y2' of a line");
+                << QStringLiteral("Failed to deserialize the member 'y2' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1305,7 +1350,7 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid line:") << json;
         return false;
     }
 
@@ -1314,8 +1359,9 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (jsonObject.size() != 4)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A line needs to have exactly four members but this one has:")
-                << jsonObject.size();
+                << QString("A line needs to have exactly 4 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1325,7 +1371,8 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x1")), &x1))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x1' of a line");
+                << QStringLiteral("Failed to deserialize the member 'x1' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1334,7 +1381,8 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x2")), &x2))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x2' of a line");
+                << QStringLiteral("Failed to deserialize the member 'x2' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1343,7 +1391,8 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y1")), &y1))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y1' of a line");
+                << QStringLiteral("Failed to deserialize the member 'y1' of a line:")
+                << jsonObject;
         return false;
     }
 
@@ -1352,11 +1401,12 @@ bool deserialize(const QJsonValue &json, QLineF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y2")), &y2))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y2' of a line");
+                << QStringLiteral("Failed to deserialize the member 'y2' of a line:")
+                << jsonObject;
         return false;
     }
 
-    value->setPoints(QPointF(x1, y1), QPointF(x2, y2));
+    value->setPoints(QPoint(x1, y1), QPoint(x2, y2));
     return true;
 }
 
@@ -1371,7 +1421,7 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid rectangle:") << json;
         return false;
     }
 
@@ -1380,8 +1430,9 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (jsonObject.size() != 4)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A rect needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A rectangle needs to have exactly 4 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1391,7 +1442,8 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x")), &x))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'x' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1400,7 +1452,8 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y")), &y))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'y' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1409,7 +1462,8 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (!deserialize(jsonObject.value(QStringLiteral("width")), &width))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'width' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'width' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1418,7 +1472,8 @@ bool deserialize(const QJsonValue &json, QRect *value)
     if (!deserialize(jsonObject.value(QStringLiteral("height")), &height))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'height' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'height' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1441,7 +1496,7 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (!json.isObject())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Object");
+                << QStringLiteral("JSON value is not a valid rectangle:") << json;
         return false;
     }
 
@@ -1450,8 +1505,9 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (jsonObject.size() != 4)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("A rect needs to have exactly two members but this one has:")
-                << jsonObject.size();
+                << QString("A rectangle needs to have exactly 4 members but this one has %1! JSON "
+                           "value:").arg(jsonObject.size())
+                << jsonObject;
         return false;
     }
 
@@ -1461,7 +1517,8 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("x")), &x))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'x' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'x' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1470,7 +1527,8 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("y")), &y))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'y' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'y' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1479,7 +1537,8 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("width")), &width))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'width' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'width' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1488,7 +1547,8 @@ bool deserialize(const QJsonValue &json, QRectF *value)
     if (!deserialize(jsonObject.value(QStringLiteral("height")), &height))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'height' of a rect");
+                << QStringLiteral("Failed to deserialize the member 'height' of a rectangle:")
+                << jsonObject;
         return false;
     }
 
@@ -1511,7 +1571,7 @@ bool deserialize(const QJsonValue &json, QStringList *value)
     if (!json.isArray())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("JSON value is not an Array");
+                << QStringLiteral("JSON value is not a valid string list:") << json;
         return false;
     }
 
@@ -1528,8 +1588,9 @@ bool deserialize(const QJsonValue &json, QStringList *value)
         if (!deserialize(item, &deserializedItem))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                    << QStringLiteral("Failed to deserialize the string list element at index:")
-                    << index;
+                    << QString("Failed to deserialize the string list element at index [%1]! JSON "
+                               "value:").arg(index)
+                    << jsonArray;
             return false;
         }
 
@@ -1538,6 +1599,166 @@ bool deserialize(const QJsonValue &json, QStringList *value)
     }
 
     return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QJsonValue *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    *value = json;
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QJsonArray *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    // Get the JSON Array representation
+    if (!json.isArray())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid JSON array:") << json;
+        return false;
+    }
+
+    *value = json.toArray();
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QJsonObject *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    // Get the JSON Object representation
+    if (!json.isObject())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid JSON object:") << json;
+        return false;
+    }
+
+    *value = json.toObject();
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QJsonDocument *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    if (json.isNull())
+    {
+        *value = QJsonDocument();
+        return true;
+    }
+
+    if (json.isArray())
+    {
+        value->setArray(json.toArray());
+        return true;
+    }
+
+    if (json.isObject())
+    {
+        value->setObject(json.toObject());
+        return true;
+    }
+
+    qCWarning(CedarFramework::LoggingCategory::Deserialization)
+            << QStringLiteral("Failed to deserialize the JSON value to a JSON document:") << json;
+    return false;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QCborValue *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    *value = QCborValue::fromJsonValue(json);
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QCborArray *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    // Get the JSON Array representation
+    if (!json.isArray())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid CBOR array:") << json;
+        return false;
+    }
+
+    *value = QCborArray::fromJsonArray(json.toArray());
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QCborMap *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    // Get the JSON Object representation
+    if (!json.isObject())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("JSON value is not a valid CBOR map:") << json;
+        return false;
+    }
+
+    *value = QCborMap::fromJsonObject(json.toObject());
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, QCborSimpleType *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    if (json.isBool())
+    {
+        *value = json.toBool() ? QCborSimpleType::True
+                               : QCborSimpleType::False;
+        return true;
+    }
+
+    if (json.isNull())
+    {
+        *value = QCborSimpleType::Null;
+        return true;
+    }
+
+    if (json.isUndefined())
+    {
+        *value = QCborSimpleType::Undefined;
+        return true;
+    }
+
+    qCWarning(CedarFramework::LoggingCategory::Deserialization)
+            << QStringLiteral("Failed to deserialize the JSON value to a CBOR simple type:")
+            << json;
+    return false;
 }
 
 } // namespace CedarFramework

@@ -205,6 +205,38 @@ template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QStringList *value);
 
 //! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonValue *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonArray *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonObject *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonDocument *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborValue *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborArray *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborMap *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborSimpleType *value);
+
+//! \copydoc    CedarFramework::serialize()
 template<typename T1, typename T2>
 bool deserialize(const QJsonValue &json, QPair<T1, T2> *value);
 

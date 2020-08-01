@@ -26,8 +26,6 @@
 // Qt includes
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
-#include <QtCore/QJsonValue>
-#include <QtCore/QMap>
 
 // System includes
 #include <unordered_map>
@@ -200,6 +198,38 @@ CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QRectF &value);
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QStringList &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonValue &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonArray &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonObject &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonDocument &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborValue &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborArray &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborMap &value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborSimpleType &value);
 
 //! \copydoc    CedarFramework::serialize()
 template<typename T1, typename T2>
