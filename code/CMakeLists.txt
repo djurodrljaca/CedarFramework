@@ -23,12 +23,14 @@ find_package(Qt5 COMPONENTS Core REQUIRED)
 # CedarFramework library
 # --------------------------------------------------------------------------------------------------
 add_library(CedarFramework SHARED
-        inc/CedarFramework/LoggingCategories.hpp
         inc/CedarFramework/Deserialization.hpp
+        inc/CedarFramework/LoggingCategories.hpp
+        inc/CedarFramework/Query.hpp
         inc/CedarFramework/Serialization.hpp
 
-        src/LoggingCategories.cpp
         src/Deserialization.cpp
+        src/LoggingCategories.cpp
+        src/Query.cpp
         src/Serialization.cpp
     )
 

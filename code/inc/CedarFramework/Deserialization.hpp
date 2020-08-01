@@ -21,7 +21,7 @@
 #pragma once
 
 // Cedar Framework includes
-#include <CedarFramework/LoggingCategories.hpp>
+#include <CedarFramework/Query.hpp>
 
 // Qt includes
 #include <QtCore/QJsonArray>
@@ -51,7 +51,7 @@ namespace CedarFramework
  * \param[out]  value   Output for the deserialized value
  *
  * \retval  true    Success
- * \retval  true    Failure
+ * \retval  false   Failure
  */
 template<typename T>
 bool deserialize(const QJsonValue &json, T *value);
@@ -298,10 +298,58 @@ bool deserialize(const QJsonValue &json, QMultiHash<K, V> *value);
  * \param[out]  key     Output for the deserialized key
  *
  * \retval  true    Success
- * \retval  true    Failure
+ * \retval  false   Failure
  */
 template<typename T>
 bool deserializeKey(const QString &value, T *key);
+
+/*!
+ * Deserializes the sub-node at the specified index
+ *
+ * \tparam  T   Value type
+ *
+ * \param data  Data to query
+ * \param index Sub-node index
+ *
+ * \param[out]  value   Output for the deserialized value
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const int index, T *value);
+
+/*!
+ * Deserializes the sub-node with the specified name
+ *
+ * \tparam  T   Value type
+ *
+ * \param data  Data to query
+ * \param name  Sub-node name
+ *
+ * \param[out]  value   Output for the deserialized value
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const int index, T *value);
+
+/*!
+ * Deserializes the sub-node at the specified path
+ *
+ * \tparam  T   Value type
+ *
+ * \param data      Data to query
+ * \param nodePath  Path to the node (list of indexes and/or member names)
+ *
+ * \param[out]  value   Output for the deserialized value
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const QVariantList &nodePath, T *value);
 
 // -------------------------------------------------------------------------------------------------
 // Template definitions
@@ -901,6 +949,57 @@ bool deserializeKey(const QString &value, T *key)
     Q_ASSERT(value != nullptr);
 
     return deserialize(QJsonValue(value), key);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const int index, T *value)
+{
+    const QJsonValue node = getNode(data, index);
+
+    if (node.isUndefined())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("Failed to find the specified node");
+        return false;
+    }
+
+    return deserialize(node, value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const QString &name, T *value)
+{
+    const QJsonValue node = getNode(data, name);
+
+    if (node.isUndefined())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("Failed to find the specified node");
+        return false;
+    }
+
+    return deserialize(node, value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const QVariantList &nodePath, T *value)
+{
+    const QJsonValue node = getNode(data, nodePath);
+
+    if (node.isUndefined())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("Failed to find the specified node");
+        return false;
+    }
+
+    return deserialize(node, value);
 }
 
 } // namespace CedarFramework
