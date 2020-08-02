@@ -54,7 +54,7 @@ namespace CedarFramework
  * \retval  false   Failure
  */
 template<typename T>
-bool deserialize(const QJsonValue &json, T *value);
+bool deserialize(const QJsonValue &json, T *value) = delete;
 
 //! \copydoc    CedarFramework::serialize()
 template<>
@@ -62,35 +62,43 @@ CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, bool *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, int8_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, signed char *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, uint8_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, unsigned char *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, int16_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, short *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, uint16_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, unsigned short *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, int32_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, int *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, uint32_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, unsigned int *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, int64_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, long *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>
-CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, uint64_t *value);
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, unsigned long *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, long long *value);
+
+//! \copydoc    CedarFramework::serialize()
+template<>
+CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, unsigned long long *value);
 
 //! \copydoc    CedarFramework::serialize()
 template<>

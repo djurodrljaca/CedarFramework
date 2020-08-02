@@ -71,7 +71,7 @@ bool
 // -------------------------------------------------------------------------------------------------
 
 template<typename T_OUT, IsMax64BitInteger<T_OUT> = true>
-bool convertIntegerValue(const int64_t inputValue, T_OUT *outputValue)
+bool convertIntegerValue(const qint64 inputValue, T_OUT *outputValue)
 {
     constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::min();
     constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
@@ -80,8 +80,8 @@ bool convertIntegerValue(const int64_t inputValue, T_OUT *outputValue)
     if (std::is_signed<T_OUT>::value)
     {
         // Output value is also signed, just check the valid range
-        if ((inputValue < static_cast<int64_t>(lowwerLimit)) ||
-            (inputValue > static_cast<int64_t>(upperLimit)))
+        if ((inputValue < static_cast<qint64>(lowwerLimit)) ||
+            (inputValue > static_cast<qint64>(upperLimit)))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QString("Value [%1] is out of range for the its data type "
@@ -99,7 +99,7 @@ bool convertIntegerValue(const int64_t inputValue, T_OUT *outputValue)
         // A negative value cannot be stored in the output or a positive value greater than the
         // max value that can be stored in the output
         if ((inputValue < 0LL) ||
-            (static_cast<uint64_t>(inputValue) > static_cast<uint64_t>(upperLimit)))
+            (static_cast<quint64>(inputValue) > static_cast<quint64>(upperLimit)))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QString("Value [%1] is out of range for the its data type "
@@ -118,13 +118,13 @@ bool convertIntegerValue(const int64_t inputValue, T_OUT *outputValue)
 // -------------------------------------------------------------------------------------------------
 
 template<typename T_OUT, IsMax64BitInteger<T_OUT> = true>
-bool convertIntegerValue(const uint64_t inputValue, T_OUT *outputValue)
+bool convertIntegerValue(const quint64 inputValue, T_OUT *outputValue)
 {
     constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::min();
     constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
 
     // Make sure that the input value can be stored in the output
-    if (inputValue > static_cast<uint64_t>(upperLimit))
+    if (inputValue > static_cast<quint64>(upperLimit))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("Value [%1] is out of range for the its data type "
@@ -172,7 +172,7 @@ bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
     // Through a signed integer
     {
         bool ok = false;
-        const int64_t integerValue = inputValue.toLongLong(&ok);
+        const qint64 integerValue = inputValue.toLongLong(&ok);
 
         if (ok)
         {
@@ -183,7 +183,7 @@ bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
     // Through an unsigned integer
     {
         bool ok = false;
-        const uint64_t integerValue = inputValue.toULongLong(&ok);
+        const quint64 integerValue = inputValue.toULongLong(&ok);
 
         if (ok)
         {
@@ -340,7 +340,7 @@ bool deserialize(const QJsonValue &json, bool *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, int8_t *value)
+bool deserialize(const QJsonValue &json, signed char *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -350,7 +350,7 @@ bool deserialize(const QJsonValue &json, int8_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, uint8_t *value)
+bool deserialize(const QJsonValue &json, unsigned char *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -360,7 +360,7 @@ bool deserialize(const QJsonValue &json, uint8_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, int16_t *value)
+bool deserialize(const QJsonValue &json, short *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -370,7 +370,7 @@ bool deserialize(const QJsonValue &json, int16_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, uint16_t *value)
+bool deserialize(const QJsonValue &json, unsigned short *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -380,7 +380,7 @@ bool deserialize(const QJsonValue &json, uint16_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, int32_t *value)
+bool deserialize(const QJsonValue &json, int *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -390,7 +390,7 @@ bool deserialize(const QJsonValue &json, int32_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, uint32_t *value)
+bool deserialize(const QJsonValue &json, unsigned int *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -400,7 +400,7 @@ bool deserialize(const QJsonValue &json, uint32_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, int64_t *value)
+bool deserialize(const QJsonValue &json, long *value)
 {
     Q_ASSERT(value != nullptr);
 
@@ -410,7 +410,27 @@ bool deserialize(const QJsonValue &json, int64_t *value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-bool deserialize(const QJsonValue &json, uint64_t *value)
+bool deserialize(const QJsonValue &json, unsigned long *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    return Internal::deserializeIntegerValue(json, value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, long long *value)
+{
+    Q_ASSERT(value != nullptr);
+
+    return Internal::deserializeIntegerValue(json, value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+bool deserialize(const QJsonValue &json, unsigned long long *value)
 {
     Q_ASSERT(value != nullptr);
 

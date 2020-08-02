@@ -60,7 +60,7 @@ QJsonValue serialize(const bool &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const int8_t &value)
+QJsonValue serialize(const signed char &value)
 {
     return value;
 }
@@ -68,7 +68,7 @@ QJsonValue serialize(const int8_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const uint8_t &value)
+QJsonValue serialize(const unsigned char &value)
 {
     return value;
 }
@@ -76,7 +76,7 @@ QJsonValue serialize(const uint8_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const int16_t &value)
+QJsonValue serialize(const short &value)
 {
     return value;
 }
@@ -84,7 +84,7 @@ QJsonValue serialize(const int16_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const uint16_t &value)
+QJsonValue serialize(const unsigned short &value)
 {
     return value;
 }
@@ -92,7 +92,7 @@ QJsonValue serialize(const uint16_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const int32_t &value)
+QJsonValue serialize(const int &value)
 {
     return value;
 }
@@ -100,7 +100,7 @@ QJsonValue serialize(const int32_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const uint32_t &value)
+QJsonValue serialize(const unsigned int &value)
 {
     return static_cast<qint64>(value);
 }
@@ -108,12 +108,28 @@ QJsonValue serialize(const uint32_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const int64_t &value)
+QJsonValue serialize(const long &value)
+{
+    return static_cast<qint64>(value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const unsigned long &value)
+{
+    return static_cast<qint64>(value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<>
+QJsonValue serialize(const long long &value)
 {
     // Store the value as integer if it can be stored without loss of precision, otherwise store it
     // as a string
-    constexpr int64_t positiveLimit =  9007199254740992LL;
-    constexpr int64_t negativeLimit = -9007199254740992LL;
+    constexpr long long positiveLimit =  9007199254740992LL;
+    constexpr long long negativeLimit = -9007199254740992LL;
 
     if ((negativeLimit <= value) && (value <= positiveLimit))
     {
@@ -126,11 +142,11 @@ QJsonValue serialize(const int64_t &value)
 // -------------------------------------------------------------------------------------------------
 
 template<>
-QJsonValue serialize(const uint64_t &value)
+QJsonValue serialize(const unsigned long long &value)
 {
     // Store the value as integer if it can be stored without loss of precision, otherwise store it
     // as a string
-    constexpr uint64_t limit = 9007199254740992ULL;
+    constexpr unsigned long long limit = 9007199254740992ULL;
 
     if (value <= limit)
     {
