@@ -51,6 +51,65 @@
 namespace CedarFramework
 {
 
+// -------------------------------------------------------------------------------------------------
+// Helper methods
+// -------------------------------------------------------------------------------------------------
+
+namespace Internal
+{
+
+template<typename T>
+using IsMax32BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 4), bool>;
+
+template<typename T>
+using Is64BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 8), bool>;
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T, IsMax32BitInteger<T> = true>
+QJsonValue convertIntegerValue(const T &value)
+{
+    return value;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T, Is64BitInteger<T> = true>
+QJsonValue convertIntegerValue(const T &value)
+{
+    // Store the value as integer if it can be stored without loss of precision, otherwise store it
+    // as a string
+
+    // Check if input value is signed
+    if (std::is_signed<T>::value)
+    {
+        constexpr T upperLimit  = static_cast<T>( 9007199254740992LL);
+        constexpr T lowwerLimit = static_cast<T>(-9007199254740992LL);
+
+        if ((lowwerLimit <= value) && (value <= upperLimit))
+        {
+            return static_cast<qint64>(value);
+        }
+
+        return QString::number(value);
+    }
+    else
+    {
+        constexpr T limit  = static_cast<T>(9007199254740992ULL);
+
+        if (value <= limit)
+        {
+            return static_cast<qint64>(value);
+        }
+
+        return QString::number(value);
+    }
+}
+
+} // namespace Internal
+
+// -------------------------------------------------------------------------------------------------
+
 template<>
 QJsonValue serialize(const bool &value)
 {
@@ -110,7 +169,7 @@ QJsonValue serialize(const unsigned int &value)
 template<>
 QJsonValue serialize(const long &value)
 {
-    return static_cast<qint64>(value);
+    return Internal::convertIntegerValue(value);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -118,7 +177,7 @@ QJsonValue serialize(const long &value)
 template<>
 QJsonValue serialize(const unsigned long &value)
 {
-    return static_cast<qint64>(value);
+    return Internal::convertIntegerValue(value);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -126,17 +185,7 @@ QJsonValue serialize(const unsigned long &value)
 template<>
 QJsonValue serialize(const long long &value)
 {
-    // Store the value as integer if it can be stored without loss of precision, otherwise store it
-    // as a string
-    constexpr long long positiveLimit =  9007199254740992LL;
-    constexpr long long negativeLimit = -9007199254740992LL;
-
-    if ((negativeLimit <= value) && (value <= positiveLimit))
-    {
-        return static_cast<qint64>(value);
-    }
-
-    return QString::number(value);
+    return Internal::convertIntegerValue(value);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -144,16 +193,7 @@ QJsonValue serialize(const long long &value)
 template<>
 QJsonValue serialize(const unsigned long long &value)
 {
-    // Store the value as integer if it can be stored without loss of precision, otherwise store it
-    // as a string
-    constexpr unsigned long long limit = 9007199254740992ULL;
-
-    if (value <= limit)
-    {
-        return static_cast<qint64>(value);
-    }
-
-    return QString::number(value);
+    return Internal::convertIntegerValue(value);
 }
 
 // -------------------------------------------------------------------------------------------------
