@@ -38,13 +38,6 @@
 
 // Test class declaration --------------------------------------------------------------------------
 
-Q_DECLARE_METATYPE(std::string)
-Q_DECLARE_METATYPE(std::wstring)
-Q_DECLARE_METATYPE(std::u16string)
-Q_DECLARE_METATYPE(std::u32string)
-
-// -------------------------------------------------------------------------------------------------
-
 template<typename T>
 using IsMax32BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 4), bool>;
 
@@ -762,6 +755,8 @@ void TestSerialization::testSerializeQBitArray_data()
 
 // Test: serialize<std::string>() method -----------------------------------------------------------
 
+Q_DECLARE_METATYPE(std::string)
+
 void TestSerialization::testSerializeStdString()
 {
     QFETCH(std::string, input);
@@ -782,6 +777,8 @@ void TestSerialization::testSerializeStdString_data()
 }
 
 // Test: serialize<std::wstring>() method ----------------------------------------------------------
+
+Q_DECLARE_METATYPE(std::wstring)
 
 void TestSerialization::testSerializeStdWString()
 {
@@ -804,6 +801,8 @@ void TestSerialization::testSerializeStdWString_data()
 
 // Test: serialize<std::u16string>() method --------------------------------------------------------
 
+Q_DECLARE_METATYPE(std::u16string)
+
 void TestSerialization::testSerializeStdU16String()
 {
     QFETCH(std::u16string, input);
@@ -824,6 +823,8 @@ void TestSerialization::testSerializeStdU16String_data()
 }
 
 // Test: serialize<std::u32string>() method --------------------------------------------------------
+
+Q_DECLARE_METATYPE(std::u32string)
 
 void TestSerialization::testSerializeStdU32String()
 {
