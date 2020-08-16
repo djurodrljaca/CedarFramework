@@ -11,7 +11,6 @@
 # You should have received a copy of the GNU Lesser General Public License along with C++ Config
 # Framework. If not, see <http://www.gnu.org/licenses/>.
 
-enable_testing()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
