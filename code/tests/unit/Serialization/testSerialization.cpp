@@ -52,23 +52,20 @@ void createIntegerTestData()
     // Check if input value is signed
     if (std::is_signed<T>::value)
     {
-        QTest::newRow("min")
-                << std::numeric_limits<T>::lowest()
-                << QJsonValue(QString::number(std::numeric_limits<T>::lowest()));
-        QTest::newRow("-1") << static_cast<T>(-1) << QJsonValue(-1LL);
-        QTest::newRow(" 0") << static_cast<T>( 0) << QJsonValue( 0LL);
-        QTest::newRow("+1") << static_cast<T>( 1) << QJsonValue( 1LL);
-        QTest::newRow("max")
-                << std::numeric_limits<T>::max()
-                << QJsonValue(QString::number(std::numeric_limits<T>::max()));
+        QTest::newRow("min") << std::numeric_limits<T>::lowest()
+                             << QJsonValue(static_cast<double>(std::numeric_limits<T>::lowest()));
+        QTest::newRow("-1") << static_cast<T>(-1) << QJsonValue(-1.0);
+        QTest::newRow(" 0") << static_cast<T>( 0) << QJsonValue( 0.0);
+        QTest::newRow("+1") << static_cast<T>( 1) << QJsonValue( 1.0);
+        QTest::newRow("max") << std::numeric_limits<T>::max()
+                             << QJsonValue(static_cast<double>(std::numeric_limits<T>::max()));
     }
     else
     {
-        QTest::newRow("0") << static_cast<T>(0) << QJsonValue(0LL);
-        QTest::newRow("1") << static_cast<T>(1) << QJsonValue(1LL);
-        QTest::newRow("max")
-                << std::numeric_limits<T>::max()
-                << QJsonValue(QString::number(std::numeric_limits<T>::max()));
+        QTest::newRow("0") << static_cast<T>(0) << QJsonValue(0.0);
+        QTest::newRow("1") << static_cast<T>(1) << QJsonValue(1.0);
+        QTest::newRow("max") << std::numeric_limits<T>::max()
+                             << QJsonValue(static_cast<double>(std::numeric_limits<T>::max()));
     }
 }
 
@@ -80,41 +77,32 @@ void createIntegerTestData()
     // Check if input value is signed
     if (std::is_signed<T>::value)
     {
-        QTest::newRow("min")
-                << std::numeric_limits<T>::lowest()
-                << QJsonValue(QString::number(std::numeric_limits<T>::lowest()));
+        QTest::newRow("min") << std::numeric_limits<T>::lowest()
+                             << QJsonValue(QString::number(std::numeric_limits<T>::lowest()));
         QTest::newRow("-9007199254740993")
-                << static_cast<T>(-9007199254740993LL)
-                << QJsonValue(QString("-9007199254740993"));
+                << static_cast<T>(-9007199254740993LL) << QJsonValue(QString("-9007199254740993"));
         QTest::newRow("-9007199254740992")
-                << static_cast<T>(-9007199254740992LL)
-                << QJsonValue(-9007199254740992LL);
-        QTest::newRow("-1") << static_cast<T>(-1LL) << QJsonValue(-1LL);
-        QTest::newRow(" 0") << static_cast<T>( 0LL) << QJsonValue( 0LL);
-        QTest::newRow("+1") << static_cast<T>( 1LL) << QJsonValue( 1LL);
+                << static_cast<T>(-9007199254740992LL) << QJsonValue(-9007199254740992.0);
+        QTest::newRow("-1") << static_cast<T>(-1LL) << QJsonValue(-1.0);
+        QTest::newRow(" 0") << static_cast<T>( 0LL) << QJsonValue( 0.0);
+        QTest::newRow("+1") << static_cast<T>( 1LL) << QJsonValue( 1.0);
         QTest::newRow("+9007199254740992")
-                << static_cast<T>(9007199254740992LL)
-                << QJsonValue(9007199254740992LL);
+                << static_cast<T>(9007199254740992LL) << QJsonValue(9007199254740992.0);
         QTest::newRow("+9007199254740993")
-                << static_cast<T>(9007199254740993LL)
-                << QJsonValue(QString("9007199254740993"));
-        QTest::newRow("max")
-                << std::numeric_limits<T>::max()
-                << QJsonValue(QString::number(std::numeric_limits<T>::max()));
+                << static_cast<T>(9007199254740993LL) << QJsonValue(QString("9007199254740993"));
+        QTest::newRow("max") << std::numeric_limits<T>::max()
+                             << QJsonValue(QString::number(std::numeric_limits<T>::max()));
     }
     else
     {
-        QTest::newRow("0") << static_cast<T>(0) << QJsonValue(0LL);
-        QTest::newRow("1") << static_cast<T>(1) << QJsonValue(1LL);
+        QTest::newRow("0") << static_cast<T>(0) << QJsonValue(0.0);
+        QTest::newRow("1") << static_cast<T>(1) << QJsonValue(1.0);
         QTest::newRow("9007199254740992")
-                << static_cast<T>(9007199254740992ULL)
-                << QJsonValue(9007199254740992LL);
+                << static_cast<T>(9007199254740992ULL) << QJsonValue(9007199254740992.0);
         QTest::newRow("9007199254740993")
-                << static_cast<T>(9007199254740993ULL)
-                << QJsonValue(QString("9007199254740993"));
-        QTest::newRow("max")
-                << std::numeric_limits<T>::max()
-                << QJsonValue(QString::number(std::numeric_limits<T>::max()));
+                << static_cast<T>(9007199254740993ULL) << QJsonValue(QString("9007199254740993"));
+        QTest::newRow("max") << std::numeric_limits<T>::max()
+                             << QJsonValue(QString::number(std::numeric_limits<T>::max()));
     }
 }
 
@@ -371,15 +359,7 @@ void TestSerialization::testSerializeSignedChar_data()
     QTest::addColumn<signed char>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("min")
-            << std::numeric_limits<signed char>::lowest()
-            << QJsonValue(static_cast<int>(std::numeric_limits<signed char>::lowest()));
-    QTest::newRow("-1") << static_cast<signed char>(-1) << QJsonValue(-1);
-    QTest::newRow(" 0") << static_cast<signed char>( 0) << QJsonValue( 0);
-    QTest::newRow("+1") << static_cast<signed char>( 1) << QJsonValue( 1);
-    QTest::newRow("max")
-            << std::numeric_limits<signed char>::max()
-            << QJsonValue(static_cast<int>(std::numeric_limits<signed char>::max()));
+    createIntegerTestData<signed char>();
 }
 
 // Test: serialize<unsigned char>() method ---------------------------------------------------------
@@ -398,11 +378,7 @@ void TestSerialization::testSerializeUnsignedChar_data()
     QTest::addColumn<unsigned char>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("0") << static_cast<unsigned char>(0) << QJsonValue(0);
-    QTest::newRow("1") << static_cast<unsigned char>(1) << QJsonValue(1);
-    QTest::newRow("max")
-            << std::numeric_limits<unsigned char>::max()
-            << QJsonValue(static_cast<int>(std::numeric_limits<unsigned char>::max()));
+    createIntegerTestData<unsigned char>();
 }
 
 // Test: serialize<short>() method -----------------------------------------------------------------
@@ -421,15 +397,7 @@ void TestSerialization::testSerializeShort_data()
     QTest::addColumn<short>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("min")
-            << std::numeric_limits<short>::lowest()
-            << QJsonValue(static_cast<int>(std::numeric_limits<short>::lowest()));
-    QTest::newRow("-1") << static_cast<short>(-1) << QJsonValue(-1);
-    QTest::newRow(" 0") << static_cast<short>( 0) << QJsonValue( 0);
-    QTest::newRow("+1") << static_cast<short>( 1) << QJsonValue( 1);
-    QTest::newRow("max")
-            << std::numeric_limits<short>::max()
-            << QJsonValue(static_cast<int>(std::numeric_limits<short>::max()));
+    createIntegerTestData<short>();
 }
 
 // Test: serialize<unsigned short>() method --------------------------------------------------------
@@ -448,11 +416,7 @@ void TestSerialization::testSerializeUnsignedShort_data()
     QTest::addColumn<unsigned short>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("0") << static_cast<unsigned short>(0) << QJsonValue(0);
-    QTest::newRow("1") << static_cast<unsigned short>(1) << QJsonValue(1);
-    QTest::newRow("max")
-            << std::numeric_limits<unsigned short>::max()
-            << QJsonValue(static_cast<int>(std::numeric_limits<unsigned short>::max()));
+    createIntegerTestData<unsigned short>();
 }
 
 // Test: serialize<int>() method -------------------------------------------------------------------
@@ -471,15 +435,7 @@ void TestSerialization::testSerializeInt_data()
     QTest::addColumn<int>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("min")
-            << std::numeric_limits<int>::lowest()
-            << QJsonValue(static_cast<int>(std::numeric_limits<int>::lowest()));
-    QTest::newRow("-1") << static_cast<int>(-1) << QJsonValue(-1);
-    QTest::newRow(" 0") << static_cast<int>( 0) << QJsonValue( 0);
-    QTest::newRow("+1") << static_cast<int>( 1) << QJsonValue( 1);
-    QTest::newRow("max")
-            << std::numeric_limits<int>::max()
-            << QJsonValue(static_cast<int>(std::numeric_limits<int>::max()));
+    createIntegerTestData<int>();
 }
 
 // Test: serialize<unsigned int>() method ----------------------------------------------------------
@@ -498,11 +454,7 @@ void TestSerialization::testSerializeUnsignedInt_data()
     QTest::addColumn<unsigned int>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("0") << static_cast<unsigned int>(0) << QJsonValue(0);
-    QTest::newRow("1") << static_cast<unsigned int>(1) << QJsonValue(1);
-    QTest::newRow("max")
-            << std::numeric_limits<unsigned int>::max()
-            << QJsonValue(static_cast<qint64>(std::numeric_limits<unsigned int>::max()));
+    createIntegerTestData<unsigned int>();
 }
 
 // Test: serialize<long>() method ------------------------------------------------------------------
