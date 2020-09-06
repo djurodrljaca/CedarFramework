@@ -489,8 +489,11 @@ private slots:
     void testDeserializeNodeByName();
     void testDeserializeNodeByName_data();
 
-    void testDeserializeNodeByPath();
-    void testDeserializeNodeByPath_data();
+    void testDeserializeNodeByPathVariantList();
+    void testDeserializeNodeByPathVariantList_data();
+
+    void testDeserializeNodeByPathStringList();
+    void testDeserializeNodeByPathStringList_data();
 };
 
 // Test Case init/cleanup methods ------------------------------------------------------------------
@@ -3782,7 +3785,7 @@ void TestDeserialization::testDeserializeNodeByName_data()
 
 // Test: deserializeNode(path) method --------------------------------------------------------------
 
-void TestDeserialization::testDeserializeNodeByPath()
+void TestDeserialization::testDeserializeNodeByPathVariantList()
 {
     QFETCH(QJsonValue, input);
     QFETCH(QVariantList, path);
@@ -3799,7 +3802,7 @@ void TestDeserialization::testDeserializeNodeByPath()
     }
 }
 
-void TestDeserialization::testDeserializeNodeByPath_data()
+void TestDeserialization::testDeserializeNodeByPathVariantList_data()
 {
     QTest::addColumn<QJsonValue>("input");
     QTest::addColumn<QVariantList>("path");
@@ -3866,9 +3869,9 @@ void TestDeserialization::testDeserializeNodeByPath_data()
     QTest::newRow("string") << QJsonValue("abc123") << QVariantList {0} << QDate() << false;
 
     QTest::newRow("array: invalid 0")
-            << QJsonValue(inputArray) << QVariantList {0} << QDate() << false;
+            << QJsonValue(inputArray) << QVariantList {0}           << QDate() << false;
     QTest::newRow("array: invalid '1/x/0'")
-            << QJsonValue(inputArray) << QVariantList {1, "x", 0} << QDate() << false;
+            << QJsonValue(inputArray) << QVariantList {1, "x", 0}   << QDate() << false;
     QTest::newRow("array: invalid '1/y/a'")
             << QJsonValue(inputArray) << QVariantList {1, "y", "a"} << QDate() << false;
 
@@ -3882,6 +3885,110 @@ void TestDeserialization::testDeserializeNodeByPath_data()
             << QJsonValue(inputObject) << QVariantList {"b", 0}         << QDate() << false;
     QTest::newRow("object: invalid 'b/1/x/0'")
             << QJsonValue(inputObject) << QVariantList {"b", 1, "x", 0} << QDate() << false;
+}
+
+// Test: deserializeNode(path) method --------------------------------------------------------------
+
+void TestDeserialization::testDeserializeNodeByPathStringList()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QStringList, path);
+    QFETCH(QDate, expectedOutput);
+    QFETCH(bool, expectedResult);
+
+    QDate output;
+    const bool result = CedarFramework::deserializeNode(input, path, &output);
+    QCOMPARE(result, expectedResult);
+
+    if (result)
+    {
+        QCOMPARE(output, expectedOutput);
+    }
+}
+
+void TestDeserialization::testDeserializeNodeByPathStringList_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QStringList>("path");
+    QTest::addColumn<QDate>("expectedOutput");
+    QTest::addColumn<bool>("expectedResult");
+
+    const QJsonArray inputArray
+    {
+        1,
+        QJsonObject
+        {
+            { "x", QJsonArray { 1, "2020-01-01", 3 } },
+            { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+            { "z", "z" }
+        },
+        true
+    };
+
+    const QJsonObject inputObject
+    {
+        { "a", true },
+        {
+            "b", QJsonArray
+            {
+                1,
+                QJsonObject
+                {
+                    { "x", QJsonArray { 1, "2020-01-01", 3 } },
+                    { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+                    { "z", "z" }
+                },
+                true
+            }
+        },
+        { "c", "2020-01-01" }
+    };
+
+    // Positive tests
+    QTest::newRow("array: valid '1/x/1'")
+            << QJsonValue(inputArray) << QStringList {"1", "x", "1"} << QDate(2020, 1, 1) << true;
+    QTest::newRow("array: valid '1/y/b'")
+            << QJsonValue(inputArray) << QStringList {"1", "y", "b"} << QDate(2020, 1, 1) << true;
+
+    QTest::newRow("object: valid 'b/1/x/1'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "1", "x", "1"}
+            << QDate(2020, 1, 1)
+            << true;
+    QTest::newRow("object: valid 'b/1/y/b'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "1", "y", "b"}
+            << QDate(2020, 1, 1)
+            << true;
+    QTest::newRow("object: valid 'c'")
+            << QJsonValue(inputObject)
+            << QStringList {"c"}
+            << QDate(2020, 1, 1)
+            << true;
+
+    // Negative tests
+    QTest::newRow("null")   << QJsonValue()         << QStringList {"0"} << QDate() << false;
+    QTest::newRow("bool")   << QJsonValue(true)     << QStringList {"0"} << QDate() << false;
+    QTest::newRow("double") << QJsonValue(123.4)    << QStringList {"0"} << QDate() << false;
+    QTest::newRow("string") << QJsonValue("abc123") << QStringList {"0"} << QDate() << false;
+
+    QTest::newRow("array: invalid 0")
+            << QJsonValue(inputArray) << QStringList {"0"}           << QDate() << false;
+    QTest::newRow("array: invalid '1/x/0'")
+            << QJsonValue(inputArray) << QStringList {"1", "x", "0"} << QDate() << false;
+    QTest::newRow("array: invalid '1/y/a'")
+            << QJsonValue(inputArray) << QStringList {"1", "y", "a"} << QDate() << false;
+
+    QTest::newRow("object: invalid ''")
+            << QJsonValue(inputObject) << QStringList {""}                 << QDate() << false;
+    QTest::newRow("object: invalid 'a'")
+            << QJsonValue(inputObject) << QStringList {"a"}                << QDate() << false;
+    QTest::newRow("object: invalid 'd'")
+            << QJsonValue(inputObject) << QStringList {"d"}                << QDate() << false;
+    QTest::newRow("object: invalid 'b/0'")
+            << QJsonValue(inputObject) << QStringList {"b", "0"}           << QDate() << false;
+    QTest::newRow("object: invalid 'b/1/x/0'")
+            << QJsonValue(inputObject) << QStringList {"b", "1", "x", "0"} << QDate() << false;
 }
 
 // Main function -----------------------------------------------------------------------------------

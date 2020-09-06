@@ -1010,4 +1010,21 @@ bool deserializeNode(const QJsonValue &data, const QVariantList &nodePath, T *va
     return deserialize(node, value);
 }
 
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const QStringList &nodePath, T *value)
+{
+    const QJsonValue node = getNode(data, nodePath);
+
+    if (node.isUndefined())
+    {
+        qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                << QStringLiteral("Failed to find the specified node");
+        return false;
+    }
+
+    return deserialize(node, value);
+}
+
 } // namespace CedarFramework
