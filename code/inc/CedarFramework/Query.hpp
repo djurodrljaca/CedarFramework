@@ -70,6 +70,17 @@ bool hasNode(const QJsonValue &data, const QString &name);
 bool hasNode(const QJsonValue &data, const QVariantList &nodePath);
 
 /*!
+ * Checks if the data contains a sub-node at the specified path
+ *
+ * \param data      Data to query
+ * \param nodePath  Path to the node (list of indexes and/or member names)
+ *
+ * \retval  true    Node was found
+ * \retval  false   Node was not
+ */
+bool hasNode(const QJsonValue &data, const QStringList &nodePath);
+
+/*!
  * Gets the sub-node at the specified index
  *
  * \param data  Data to query
@@ -98,5 +109,15 @@ QJsonValue getNode(const QJsonValue &data, const QString &name);
  * \return  Node at the specified path or an Undefined value if the node was not found
  */
 QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath);
+
+/*!
+ * Gets the sub-node at the specified path
+ *
+ * \param data      Data to query
+ * \param nodePath  Path to the node (list of indexes and/or member names)
+ *
+ * \return  Node at the specified path or an Undefined value if the node was not found
+ */
+QJsonValue getNode(const QJsonValue &data, const QStringList &nodePath);
 
 } // namespace CedarFramework

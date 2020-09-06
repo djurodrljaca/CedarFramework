@@ -58,6 +58,13 @@ bool hasNode(const QJsonValue &data, const QVariantList &nodePath)
 
 // -------------------------------------------------------------------------------------------------
 
+bool hasNode(const QJsonValue &data, const QStringList &nodePath)
+{
+    return (!getNode(data, nodePath).isUndefined());
+}
+
+// -------------------------------------------------------------------------------------------------
+
 QJsonValue getNode(const QJsonValue &data, const int index)
 {
     // Note: if sub-node is not found an Undefined value is returned
@@ -108,6 +115,50 @@ QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath)
 
                 // Note: if sub-node is not found an Undefined value is returned
                 node = node[nodePathItem.toString()];
+                break;
+            }
+
+            default:
+            {
+                // Only Array and Object types have sub-nodes!
+                return QJsonValue::Undefined;
+            }
+        }
+    }
+
+    return node;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+QJsonValue getNode(const QJsonValue &data, const QStringList &nodePath)
+{
+    QJsonValue node = data;
+
+    for (const QString &nodePathItem : nodePath)
+    {
+        switch (node.type())
+        {
+            case QJsonValue::Array:
+            {
+                bool ok = false;
+                const int index = nodePathItem.toInt(&ok);
+
+                if (!ok)
+                {
+                    // Not an index
+                    return QJsonValue::Undefined;
+                }
+
+                // Note: if sub-node is not found an Undefined value is returned
+                node = node[index];
+                break;
+            }
+
+            case QJsonValue::Object:
+            {
+                // Note: if sub-node is not found an Undefined value is returned
+                node = node[nodePathItem];
                 break;
             }
 

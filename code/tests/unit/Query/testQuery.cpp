@@ -56,8 +56,11 @@ private slots:
     void testQueryHasNodeByName();
     void testQueryHasNodeByName_data();
 
-    void testQueryHasNodeByPath();
-    void testQueryHasNodeByPath_data();
+    void testQueryHasNodeByPathVariantList();
+    void testQueryHasNodeByPathVariantList_data();
+
+    void testQueryHasNodeByPathStringList();
+    void testQueryHasNodeByPathStringList_data();
 
     void testQueryGetNodeByIndex();
     void testQueryGetNodeByIndex_data();
@@ -65,8 +68,11 @@ private slots:
     void testQueryGetNodeByName();
     void testQueryGetNodeByName_data();
 
-    void testQueryGetNodeByPath();
-    void testQueryGetNodeByPath_data();
+    void testQueryGetNodeByPathVariantList();
+    void testQueryGetNodeByPathVariantList_data();
+
+    void testQueryGetNodeByPathStringList();
+    void testQueryGetNodeByPathStringList_data();
 };
 
 // Test Case init/cleanup methods ------------------------------------------------------------------
@@ -160,7 +166,7 @@ void TestQuery::testQueryHasNodeByName_data()
 
 // Test: hasNode(input, path) method ---------------------------------------------------------------
 
-void TestQuery::testQueryHasNodeByPath()
+void TestQuery::testQueryHasNodeByPathVariantList()
 {
     QFETCH(QJsonValue, input);
     QFETCH(QVariantList, path);
@@ -170,7 +176,7 @@ void TestQuery::testQueryHasNodeByPath()
     QCOMPARE(result, expectedResult);
 }
 
-void TestQuery::testQueryHasNodeByPath_data()
+void TestQuery::testQueryHasNodeByPathVariantList_data()
 {
     QTest::addColumn<QJsonValue>("input");
     QTest::addColumn<QVariantList>("path");
@@ -234,6 +240,84 @@ void TestQuery::testQueryHasNodeByPath_data()
     QTest::newRow("d/y/c") << input << QVariantList { "d", "y", "c" } << false;
     QTest::newRow("d/y/1") << input << QVariantList { "d", "y", 1 } << false;
     QTest::newRow("d/QBitArray") << input << QVariantList { "d", QBitArray() } << false;
+}
+
+// Test: hasNode(input, path) method ---------------------------------------------------------------
+
+void TestQuery::testQueryHasNodeByPathStringList()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QStringList, path);
+    QFETCH(bool, expectedResult);
+
+    const bool result = CedarFramework::hasNode(input, path);
+    QCOMPARE(result, expectedResult);
+}
+
+void TestQuery::testQueryHasNodeByPathStringList_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QStringList>("path");
+    QTest::addColumn<bool>("expectedResult");
+
+    const QJsonValue input
+    {
+        QJsonObject
+        {
+            { "a", true },
+            {
+                "b", QJsonArray
+                {
+                    1,
+                    QJsonObject
+                    {
+                        { "x", QJsonArray { 1, 2, 3 } },
+                        { "y", QJsonObject { { "a", 1 }, { "b", 2 } } },
+                        { "z", "z" }
+                    },
+                    true
+                }
+            },
+            { "c", "a" },
+            {
+                "d", QJsonObject
+                {
+                    { "x", QJsonArray { 1, 2, 3 } },
+                    { "y", QJsonObject { { "a", 1 }, { "b", 2 }, { "7", "x"} } },
+                    { "z", "z" }
+                }
+            }
+        }
+    };
+
+    // Positive tests
+    QTest::newRow("a") << input << QStringList { "a" } << true;
+    QTest::newRow("b") << input << QStringList { "b" } << true;
+    QTest::newRow("b/0") << input << QStringList { "b", "0" } << true;
+    QTest::newRow("b/1") << input << QStringList { "b", "1" } << true;
+    QTest::newRow("b/'2'") << input << QStringList { "b", "2" } << true;
+    QTest::newRow("b/1/x") << input << QStringList { "b", "1", "x" } << true;
+    QTest::newRow("b/1/x/1") << input << QStringList { "b", "1", "x", "1" } << true;
+    QTest::newRow("b/1/y") << input << QStringList { "b", "1", "y" } << true;
+    QTest::newRow("b/1/y/a") << input << QStringList { "b", "1", "y", "a" } << true;
+    QTest::newRow("c") << input << QStringList { "c" } << true;
+    QTest::newRow("d") << input << QStringList { "d" } << true;
+    QTest::newRow("d/x") << input << QStringList { "d", "x" } << true;
+    QTest::newRow("d/x/0") << input << QStringList { "d", "x", "0" } << true;
+    QTest::newRow("d/y") << input << QStringList { "d", "y" } << true;
+    QTest::newRow("d/y/b") << input << QStringList { "d", "y", "b" } << true;
+    QTest::newRow("d/y/7") << input << QStringList { "d", "y", "7" } << true;
+    QTest::newRow("d/z") << input << QStringList { "d", "z" } << true;
+
+    // Negative tests
+    QTest::newRow("x") << input << QStringList { "x" } << false;
+    QTest::newRow("a/1") << input << QStringList { "a", "1" } << false;
+    QTest::newRow("a/a") << input << QStringList { "a", "a" } << false;
+    QTest::newRow("d/x/3") << input << QStringList { "d", "x", "3" } << false;
+    QTest::newRow("d/x/a") << input << QStringList { "d", "x", "a" } << false;
+    QTest::newRow("d/y/c") << input << QStringList { "d", "y", "c" } << false;
+    QTest::newRow("d/y/1") << input << QStringList { "d", "y", "1" } << false;
+    QTest::newRow("d/QBitArray") << input << QStringList { "d", "" } << false;
 }
 
 // Test: getNode(input, index) method --------------------------------------------------------------
@@ -307,7 +391,7 @@ void TestQuery::testQueryGetNodeByName_data()
 
 // Test: getNode(input, path) method ---------------------------------------------------------------
 
-void TestQuery::testQueryGetNodeByPath()
+void TestQuery::testQueryGetNodeByPathVariantList()
 {
     QFETCH(QJsonValue, input);
     QFETCH(QVariantList, path);
@@ -317,7 +401,7 @@ void TestQuery::testQueryGetNodeByPath()
     QCOMPARE(result, expectedResult);
 }
 
-void TestQuery::testQueryGetNodeByPath_data()
+void TestQuery::testQueryGetNodeByPathVariantList_data()
 {
     QTest::addColumn<QJsonValue>("input");
     QTest::addColumn<QVariantList>("path");
@@ -424,6 +508,128 @@ void TestQuery::testQueryGetNodeByPath_data()
     QTest::newRow("d/y/1") << input << QVariantList { "d", "y", 1 }
                            << QJsonValue(QJsonValue::Undefined);
     QTest::newRow("d/QBitArray") << input << QVariantList { "d", QBitArray() }
+                                 << QJsonValue(QJsonValue::Undefined);
+}
+
+// Test: getNode(input, path) method ---------------------------------------------------------------
+
+void TestQuery::testQueryGetNodeByPathStringList()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QStringList, path);
+    QFETCH(QJsonValue, expectedResult);
+
+    const auto result = CedarFramework::getNode(input, path);
+    QCOMPARE(result, expectedResult);
+}
+
+void TestQuery::testQueryGetNodeByPathStringList_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QStringList>("path");
+    QTest::addColumn<QJsonValue>("expectedResult");
+
+    const QJsonValue input
+    {
+        QJsonObject
+        {
+            { "a", true },
+            {
+                "b", QJsonArray
+                {
+                    1,
+                    QJsonObject
+                    {
+                        { "x", QJsonArray { 1, 2, 3 } },
+                        { "y", QJsonObject { { "a", 1 }, { "b", 2 } } },
+                        { "z", "z" }
+                    },
+                    true
+                }
+            },
+            { "c", "a" },
+            {
+                "d", QJsonObject
+                {
+                    { "x", QJsonArray { 1, 2, 3 } },
+                    { "y", QJsonObject { { "a", 1 }, { "b", 2 }, { "7", "x"} } },
+                    { "z", "z" }
+                }
+            }
+        }
+    };
+
+    // Positive tests
+    QTest::newRow("a") << input << QStringList { "a" } << QJsonValue(true);
+
+    {
+        const QJsonArray expectedResult
+        {
+            1,
+            QJsonObject
+            {
+                { "x", QJsonArray { 1, 2, 3 } },
+                { "y", QJsonObject { { "a", 1 }, { "b", 2 } } },
+                { "z", "z" }
+            },
+            true
+        };
+        QTest::newRow("b") << input << QStringList { "b" } << QJsonValue(expectedResult);
+    }
+
+    QTest::newRow("b/0") << input << QStringList { "b", "0" } << QJsonValue(1);
+
+    {
+        const QJsonObject expectedResult
+        {
+            { "x", QJsonArray { 1, 2, 3 } },
+            { "y", QJsonObject { { "a", 1 }, { "b", 2 } } },
+            { "z", "z" }
+        };
+        QTest::newRow("b/1") << input << QStringList { "b", "1" } << QJsonValue(expectedResult);
+    }
+
+    QTest::newRow("b/'2'") << input << QStringList { "b", "2" } << QJsonValue(true);
+    QTest::newRow("b/1/x") << input << QStringList { "b", "1", "x" }
+                           << QJsonValue(QJsonArray { 1, 2, 3 });
+    QTest::newRow("b/1/x/1") << input << QStringList { "b", "1", "x", "1" } << QJsonValue(2);
+    QTest::newRow("b/1/y") << input << QStringList { "b", "1", "y" }
+                           << QJsonValue(QJsonObject { { "a", 1 }, { "b", 2 } });
+    QTest::newRow("b/1/y/a") << input << QStringList { "b", "1", "y", "a" } << QJsonValue(1);
+    QTest::newRow("c") << input << QStringList { "c" } << QJsonValue("a");
+
+    {
+        const QJsonObject expectedResult
+        {
+            { "x", QJsonArray { 1, 2, 3 } },
+            { "y", QJsonObject { { "a", 1 }, { "b", 2 }, { "7", "x"} } },
+            { "z", "z" }
+        };
+        QTest::newRow("d") << input << QStringList { "d" } << QJsonValue(expectedResult);
+    }
+
+    QTest::newRow("d/x") << input << QStringList { "d", "x" }
+                         << QJsonValue(QJsonArray { 1, 2, 3 });
+    QTest::newRow("d/x/0") << input << QStringList { "d", "x", "0" } << QJsonValue(1);
+    QTest::newRow("d/y") << input << QStringList { "d", "y" }
+                         << QJsonValue(QJsonObject { { "a", 1 }, { "b", 2 }, { "7", "x"} });
+    QTest::newRow("d/y/b") << input << QStringList { "d", "y", "b" } << QJsonValue(2);
+    QTest::newRow("d/y/7") << input << QStringList { "d", "y", "7" } << QJsonValue("x");
+    QTest::newRow("d/z") << input << QStringList { "d", "z" } << QJsonValue("z");
+
+    // Negative tests
+    QTest::newRow("x") << input << QStringList { "x" } << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("a/1") << input << QStringList { "a", "1" } << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("a/a") << input << QStringList { "a", "a" } << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("d/x/3") << input << QStringList { "d", "x", "3" }
+                           << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("d/x/a") << input << QStringList { "d", "x", "a" }
+                           << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("d/y/c") << input << QStringList { "d", "y", "c" }
+                           << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("d/y/1") << input << QStringList { "d", "y", "1" }
+                           << QJsonValue(QJsonValue::Undefined);
+    QTest::newRow("d/QBitArray") << input << QStringList { "d", "" }
                                  << QJsonValue(QJsonValue::Undefined);
 }
 
