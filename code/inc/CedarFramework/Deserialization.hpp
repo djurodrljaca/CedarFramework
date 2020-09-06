@@ -316,8 +316,8 @@ bool deserializeKey(const QString &value, T *key);
  *
  * \tparam  T   Value type
  *
- * \param data  Data to query
- * \param index Sub-node index
+ * \param   data    Data to query
+ * \param   index   Sub-node index
  *
  * \param[out]  value   Output for the deserialized value
  *
@@ -332,8 +332,8 @@ bool deserializeNode(const QJsonValue &data, const int index, T *value);
  *
  * \tparam  T   Value type
  *
- * \param data  Data to query
- * \param name  Sub-node name
+ * \param   data    Data to query
+ * \param   name    Sub-node name
  *
  * \param[out]  value   Output for the deserialized value
  *
@@ -341,15 +341,15 @@ bool deserializeNode(const QJsonValue &data, const int index, T *value);
  * \retval  true    Failure
  */
 template<typename T>
-bool deserializeNode(const QJsonValue &data, const int index, T *value);
+bool deserializeNode(const QJsonValue &data, const QString &name, T *value);
 
 /*!
  * Deserializes the sub-node at the specified path
  *
  * \tparam  T   Value type
  *
- * \param data      Data to query
- * \param nodePath  Path to the node (list of indexes and/or member names)
+ * \param   data        Data to query
+ * \param   nodePath    Path to the node (list of indexes and/or member names)
  *
  * \param[out]  value   Output for the deserialized value
  *
@@ -358,6 +358,102 @@ bool deserializeNode(const QJsonValue &data, const int index, T *value);
  */
 template<typename T>
 bool deserializeNode(const QJsonValue &data, const QVariantList &nodePath, T *value);
+
+/*!
+ * Deserializes the sub-node at the specified path
+ *
+ * \tparam  T   Value type
+ *
+ * \param   data        Data to query
+ * \param   nodePath    Path to the node (list of indexes and/or member names)
+ *
+ * \param[out]  value   Output for the deserialized value
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeNode(const QJsonValue &data, const QStringList &nodePath, T *value);
+
+/*!
+ * Deserializes the optional sub-node at the specified index
+ *
+ * \tparam  T   Value type
+ *
+ * \param   data    Data to query
+ * \param   index   Sub-node index
+ *
+ * \param[out]  value           Output for the deserialized value
+ * \param[out]  deserialized    Optional output for the flag if the value was actually deserialized
+ *
+ * \retval  true    Success (node was found and deserialied, or node was not found)
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const int index,
+                             T *value,
+                             bool *deserialized = nullptr);
+
+/*!
+ * Deserializes the sub-node with the specified name
+ *
+ * \tparam  T   Value type
+ *
+ * \param   data    Data to query
+ * \param   name    Sub-node name
+ *
+ * \param[out]  value           Output for the deserialized value
+ * \param[out]  deserialized    Optional output for the flag if the value was actually deserialized
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QString &name,
+                             T *value,
+                             bool *deserialized = nullptr);
+
+/*!
+ * Deserializes the sub-node at the specified path
+ *
+ * \tparam  T   Value type
+ *
+ * \param   data        Data to query
+ * \param   nodePath    Path to the node (list of indexes and/or member names)
+ *
+ * \param[out]  value           Output for the deserialized value
+ * \param[out]  deserialized    Optional output for the flag if the value was actually deserialized
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QVariantList &nodePath,
+                             T *value,
+                             bool *deserialized = nullptr);
+
+/*!
+ * Deserializes the sub-node at the specified path
+ *
+ * \tparam  T   Value type
+ *
+ * \param   data        Data to query
+ * \param   nodePath    Path to the node (list of indexes and/or member names)
+ *
+ * \param[out]  value           Output for the deserialized value
+ * \param[out]  deserialized    Optional output for the flag if the value was actually deserialized
+ *
+ * \retval  true    Success
+ * \retval  true    Failure
+ */
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QStringList &nodePath,
+                             T *value,
+                             bool *deserialized = nullptr);
 
 // -------------------------------------------------------------------------------------------------
 // Template definitions
@@ -1025,6 +1121,138 @@ bool deserializeNode(const QJsonValue &data, const QStringList &nodePath, T *val
     }
 
     return deserialize(node, value);
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const int index,
+                             T *value,
+                             bool *deserialized)
+{
+    if (deserialized != nullptr)
+    {
+        *deserialized = false;
+    }
+
+    const QJsonValue node = getNode(data, index);
+
+    if (node.isUndefined())
+    {
+        // Node not found, not a failure as this is an optional node
+        return true;
+    }
+
+    if (!deserialize(node, value))
+    {
+        return false;
+    }
+
+    if (deserialized != nullptr)
+    {
+        *deserialized = true;
+    }
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QString &name,
+                             T *value,
+                             bool *deserialized)
+{
+    if (deserialized != nullptr)
+    {
+        *deserialized = false;
+    }
+
+    const QJsonValue node = getNode(data, name);
+
+    if (node.isUndefined())
+    {
+        // Node not found, not a failure as this is an optional node
+        return true;
+    }
+
+    if (!deserialize(node, value))
+    {
+        return false;
+    }
+
+    if (deserialized != nullptr)
+    {
+        *deserialized = true;
+    }
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QVariantList &nodePath,
+                             T *value,
+                             bool *deserialized)
+{
+    if (deserialized != nullptr)
+    {
+        *deserialized = false;
+    }
+
+    const QJsonValue node = getNode(data, nodePath);
+
+    if (node.isUndefined())
+    {
+        // Node not found, not a failure as this is an optional node
+        return true;
+    }
+
+    if (!deserialize(node, value))
+    {
+        return false;
+    }
+
+    if (deserialized != nullptr)
+    {
+        *deserialized = true;
+    }
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T>
+bool deserializeOptionalNode(const QJsonValue &data,
+                             const QStringList &nodePath,
+                             T *value,
+                             bool *deserialized)
+{
+    if (deserialized != nullptr)
+    {
+        *deserialized = false;
+    }
+
+    const QJsonValue node = getNode(data, nodePath);
+
+    if (node.isUndefined())
+    {
+        // Node not found, not a failure as this is an optional node
+        return true;
+    }
+
+    if (!deserialize(node, value))
+    {
+        return false;
+    }
+
+    if (deserialized != nullptr)
+    {
+        *deserialized = true;
+    }
+    return true;
 }
 
 } // namespace CedarFramework

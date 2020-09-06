@@ -494,6 +494,18 @@ private slots:
 
     void testDeserializeNodeByPathStringList();
     void testDeserializeNodeByPathStringList_data();
+
+    void testDeserializeOptionalNodeByIndex();
+    void testDeserializeOptionalNodeByIndex_data();
+
+    void testDeserializeOptionalNodeByName();
+    void testDeserializeOptionalNodeByName_data();
+
+    void testDeserializeOptionalNodeByPathVariantList();
+    void testDeserializeOptionalNodeByPathVariantList_data();
+
+    void testDeserializeOptionalNodeByPathStringList();
+    void testDeserializeOptionalNodeByPathStringList_data();
 };
 
 // Test Case init/cleanup methods ------------------------------------------------------------------
@@ -3868,12 +3880,16 @@ void TestDeserialization::testDeserializeNodeByPathVariantList_data()
     QTest::newRow("double") << QJsonValue(123.4)    << QVariantList {0} << QDate() << false;
     QTest::newRow("string") << QJsonValue("abc123") << QVariantList {0} << QDate() << false;
 
+    QTest::newRow("array: invalid -1")
+            << QJsonValue(inputArray) << QVariantList {-1}          << QDate() << false;
     QTest::newRow("array: invalid 0")
             << QJsonValue(inputArray) << QVariantList {0}           << QDate() << false;
     QTest::newRow("array: invalid '1/x/0'")
             << QJsonValue(inputArray) << QVariantList {1, "x", 0}   << QDate() << false;
     QTest::newRow("array: invalid '1/y/a'")
             << QJsonValue(inputArray) << QVariantList {1, "y", "a"} << QDate() << false;
+    QTest::newRow("array: invalid 3")
+            << QJsonValue(inputArray) << QVariantList {3}           << QDate() << false;
 
     QTest::newRow("object: invalid ''")
             << QJsonValue(inputObject) << QVariantList {""}             << QDate() << false;
@@ -3972,12 +3988,16 @@ void TestDeserialization::testDeserializeNodeByPathStringList_data()
     QTest::newRow("double") << QJsonValue(123.4)    << QStringList {"0"} << QDate() << false;
     QTest::newRow("string") << QJsonValue("abc123") << QStringList {"0"} << QDate() << false;
 
+    QTest::newRow("array: invalid -1")
+            << QJsonValue(inputArray) << QStringList {"-1"}          << QDate() << false;
     QTest::newRow("array: invalid 0")
             << QJsonValue(inputArray) << QStringList {"0"}           << QDate() << false;
     QTest::newRow("array: invalid '1/x/0'")
             << QJsonValue(inputArray) << QStringList {"1", "x", "0"} << QDate() << false;
     QTest::newRow("array: invalid '1/y/a'")
             << QJsonValue(inputArray) << QStringList {"1", "y", "a"} << QDate() << false;
+    QTest::newRow("array: invalid 3")
+            << QJsonValue(inputArray) << QStringList {"3"}           << QDate() << false;
 
     QTest::newRow("object: invalid ''")
             << QJsonValue(inputObject) << QStringList {""}                 << QDate() << false;
@@ -3989,6 +4009,413 @@ void TestDeserialization::testDeserializeNodeByPathStringList_data()
             << QJsonValue(inputObject) << QStringList {"b", "0"}           << QDate() << false;
     QTest::newRow("object: invalid 'b/1/x/0'")
             << QJsonValue(inputObject) << QStringList {"b", "1", "x", "0"} << QDate() << false;
+}
+
+// Test: deserializeOptionalNode(index) method -----------------------------------------------------
+
+void TestDeserialization::testDeserializeOptionalNodeByIndex()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(int, index);
+    QFETCH(QDate, expectedOutput);
+    QFETCH(bool, expectedResult);
+    QFETCH(bool, expectedDeserialized);
+
+    QDate output;
+    bool deserialized;
+    const bool result =
+            CedarFramework::deserializeOptionalNode(input, index, &output, &deserialized);
+    QCOMPARE(result, expectedResult);
+    QCOMPARE(deserialized, expectedDeserialized);
+
+    if (result && deserialized)
+    {
+        QCOMPARE(output, expectedOutput);
+    }
+}
+
+void TestDeserialization::testDeserializeOptionalNodeByIndex_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<int>("index");
+    QTest::addColumn<QDate>("expectedOutput");
+    QTest::addColumn<bool>("expectedResult");
+    QTest::addColumn<bool>("expectedDeserialized");
+
+    const QJsonArray input
+    {
+        { 1.0 },
+        { "2020-01-01" },
+        { "2020-01-02" },
+        { "asd" }
+    };
+
+    // Positive tests
+    QTest::newRow("null")   << QJsonValue()         << 0 << QDate() << true << false;
+    QTest::newRow("bool")   << QJsonValue(true)     << 0 << QDate() << true << false;
+    QTest::newRow("double") << QJsonValue(123.4)    << 0 << QDate() << true << false;
+    QTest::newRow("string") << QJsonValue("abc123") << 0 << QDate() << true << false;
+
+    QTest::newRow("array: valid 1") << QJsonValue(input) << 1 << QDate(2020, 1, 1) << true << true;
+    QTest::newRow("array: valid 2") << QJsonValue(input) << 2 << QDate(2020, 1, 2) << true << true;
+
+    QTest::newRow("array: not deserialized -1")
+            << QJsonValue(input) << -1 << QDate() << true << false;
+    QTest::newRow("array: not deserialized  4")
+            << QJsonValue(input) <<  4 << QDate() << true << false;
+
+    QTest::newRow("object: not deserialized")
+            << QJsonValue(QJsonObject { {"a", 1} }) << 0 << QDate() << true << false;
+
+    // Negative tests
+    QTest::newRow("array: invalid 0") << QJsonValue(input) << 0 << QDate() << false << false;
+    QTest::newRow("array: invalid 3") << QJsonValue(input) << 3 << QDate() << false << false;
+}
+
+// Test: deserializeOptionalNode(name) method ------------------------------------------------------
+
+void TestDeserialization::testDeserializeOptionalNodeByName()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QString, name);
+    QFETCH(QDate, expectedOutput);
+    QFETCH(bool, expectedResult);
+    QFETCH(bool, expectedDeserialized);
+
+    QDate output;
+    bool deserialized;
+    const bool result =
+            CedarFramework::deserializeOptionalNode(input, name, &output, &deserialized);
+    QCOMPARE(result, expectedResult);
+    QCOMPARE(deserialized, expectedDeserialized);
+
+    if (result && deserialized)
+    {
+        QCOMPARE(output, expectedOutput);
+    }
+}
+
+void TestDeserialization::testDeserializeOptionalNodeByName_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QString>("name");
+    QTest::addColumn<QDate>("expectedOutput");
+    QTest::addColumn<bool>("expectedResult");
+    QTest::addColumn<bool>("expectedDeserialized");
+
+    const QJsonObject input
+    {
+        { "x", 1.0 },
+        { "y", "2020-01-01" },
+        { "w", "2020-01-02" },
+        { "z", "asd" }
+    };
+
+    // Positive tests
+    QTest::newRow("null")   << QJsonValue()         << QString("a") << QDate() << true << false;
+    QTest::newRow("bool")   << QJsonValue(true)     << QString("a") << QDate() << true << false;
+    QTest::newRow("double") << QJsonValue(123.4)    << QString("a") << QDate() << true << false;
+    QTest::newRow("string") << QJsonValue("abc123") << QString("a") << QDate() << true << false;
+
+    QTest::newRow("array: not deserialized")
+            << QJsonValue(QJsonArray {"a", 1}) << QString("a") << QDate() << true << false;
+
+    QTest::newRow("object: valid 'y'")
+            << QJsonValue(input) << QString("y") << QDate(2020, 1, 1) << true << true;
+    QTest::newRow("object: valid 'w'")
+            << QJsonValue(input) << QString("w") << QDate(2020, 1, 2) << true << true;
+
+    QTest::newRow("object: not deserialized 'a'")
+            << QJsonValue(input) << QString("a") << QDate() << true << false;
+    QTest::newRow("object: not deserialized ''")
+            << QJsonValue(input) << QString("")  << QDate() << true << false;
+
+    // Negative tests
+    QTest::newRow("object: invalid 'x'")
+            << QJsonValue(input) << QString("x") << QDate() << false << false;
+    QTest::newRow("object: invalid 'z'")
+            << QJsonValue(input) << QString("z") << QDate() << false << false;
+}
+
+
+// Test: deserializeOptionalNode(path) method ------------------------------------------------------
+
+void TestDeserialization::testDeserializeOptionalNodeByPathVariantList()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QVariantList, path);
+    QFETCH(QDate, expectedOutput);
+    QFETCH(bool, expectedResult);
+    QFETCH(bool, expectedDeserialized);
+
+    QDate output;
+    bool deserialized;
+    const bool result =
+            CedarFramework::deserializeOptionalNode(input, path, &output, &deserialized);
+    QCOMPARE(result, expectedResult);
+    QCOMPARE(deserialized, expectedDeserialized);
+
+    if (result && deserialized)
+    {
+        QCOMPARE(output, expectedOutput);
+    }
+}
+
+void TestDeserialization::testDeserializeOptionalNodeByPathVariantList_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QVariantList>("path");
+    QTest::addColumn<QDate>("expectedOutput");
+    QTest::addColumn<bool>("expectedResult");
+    QTest::addColumn<bool>("expectedDeserialized");
+
+    const QJsonArray inputArray
+    {
+        1,
+        QJsonObject
+        {
+            { "x", QJsonArray { 1, "2020-01-01", 3 } },
+            { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+            { "z", "z" }
+        },
+        true
+    };
+
+    const QJsonObject inputObject
+    {
+        { "a", true },
+        {
+            "b", QJsonArray
+            {
+                1,
+                QJsonObject
+                {
+                    { "x", QJsonArray { 1, "2020-01-01", 3 } },
+                    { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+                    { "z", "z" }
+                },
+                true
+            }
+        },
+        { "c", "2020-01-01" }
+    };
+
+    // Positive tests
+    QTest::newRow("null")   << QJsonValue()         << QVariantList {0} << QDate() << true << false;
+    QTest::newRow("bool")   << QJsonValue(true)     << QVariantList {0} << QDate() << true << false;
+    QTest::newRow("double") << QJsonValue(123.4)    << QVariantList {0} << QDate() << true << false;
+    QTest::newRow("string") << QJsonValue("abc123") << QVariantList {0} << QDate() << true << false;
+
+    QTest::newRow("array: valid '1/x/1'")
+            << QJsonValue(inputArray)
+            << QVariantList {1, "x", 1}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("array: valid '1/y/b'")
+            << QJsonValue(inputArray)
+            << QVariantList { 1, "y", "b"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+
+    QTest::newRow("object: valid 'b/1/x/1'")
+            << QJsonValue(inputObject)
+            << QVariantList {"b", 1, "x", 1}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("object: valid 'b/1/y/b'")
+            << QJsonValue(inputObject)
+            << QVariantList {"b", 1, "y", "b"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("object: valid 'c'")
+            << QJsonValue(inputObject)
+            << QVariantList {"c"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+
+    QTest::newRow("array: not deserialized -1")
+            << QJsonValue(inputArray) << QVariantList {-1} << QDate() << true << false;
+    QTest::newRow("array: not deserialized 3")
+            << QJsonValue(inputArray) << QVariantList { 3} << QDate() << true << false;
+
+    QTest::newRow("object: not deserialized ''")
+            << QJsonValue(inputObject) << QVariantList {""}  << QDate() << true << false;
+    QTest::newRow("object: not deserialized 'd'")
+            << QJsonValue(inputObject) << QVariantList {"d"} << QDate() << true << false;
+
+    // Negative tests
+    QTest::newRow("array: invalid 0")
+            << QJsonValue(inputArray) << QVariantList {0}           << QDate() << false << false;
+    QTest::newRow("array: invalid '1/x/0'")
+            << QJsonValue(inputArray) << QVariantList {1, "x", 0}   << QDate() << false << false;
+    QTest::newRow("array: invalid '1/y/a'")
+            << QJsonValue(inputArray) << QVariantList {1, "y", "a"} << QDate() << false << false;
+
+    QTest::newRow("object: invalid 'a'")
+            << QJsonValue(inputObject)
+            << QVariantList {"a"}
+            << QDate()
+            << false
+            << false;
+    QTest::newRow("object: invalid 'b/0'")
+            << QJsonValue(inputObject)
+            << QVariantList {"b", 0}
+            << QDate()
+            << false
+            << false;
+    QTest::newRow("object: invalid 'b/1/x/0'")
+            << QJsonValue(inputObject)
+            << QVariantList {"b", 1, "x", 0}
+            << QDate()
+            << false
+            << false;
+}
+
+// Test: deserializeOptionalNode(path) method ------------------------------------------------------
+
+void TestDeserialization::testDeserializeOptionalNodeByPathStringList()
+{
+    QFETCH(QJsonValue, input);
+    QFETCH(QStringList, path);
+    QFETCH(QDate, expectedOutput);
+    QFETCH(bool, expectedResult);
+    QFETCH(bool, expectedDeserialized);
+
+    QDate output;
+    bool deserialized;
+    const bool result =
+            CedarFramework::deserializeOptionalNode(input, path, &output, &deserialized);
+    QCOMPARE(result, expectedResult);
+    QCOMPARE(deserialized, expectedDeserialized);
+
+    if (result && deserialized)
+    {
+        QCOMPARE(output, expectedOutput);
+    }
+}
+
+void TestDeserialization::testDeserializeOptionalNodeByPathStringList_data()
+{
+    QTest::addColumn<QJsonValue>("input");
+    QTest::addColumn<QStringList>("path");
+    QTest::addColumn<QDate>("expectedOutput");
+    QTest::addColumn<bool>("expectedResult");
+    QTest::addColumn<bool>("expectedDeserialized");
+
+    const QJsonArray inputArray
+    {
+        1,
+        QJsonObject
+        {
+            { "x", QJsonArray { 1, "2020-01-01", 3 } },
+            { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+            { "z", "z" }
+        },
+        true
+    };
+
+    const QJsonObject inputObject
+    {
+        { "a", true },
+        {
+            "b", QJsonArray
+            {
+                1,
+                QJsonObject
+                {
+                    { "x", QJsonArray { 1, "2020-01-01", 3 } },
+                    { "y", QJsonObject { { "a", 1 }, { "b", "2020-01-01" } } },
+                    { "z", "z" }
+                },
+                true
+            }
+        },
+        { "c", "2020-01-01" }
+    };
+
+    // Positive tests
+    QTest::newRow("null")
+            << QJsonValue()         << QStringList {"0"} << QDate() << true << false;
+    QTest::newRow("bool")
+            << QJsonValue(true)     << QStringList {"0"} << QDate() << true << false;
+    QTest::newRow("double")
+            << QJsonValue(123.4)    << QStringList {"0"} << QDate() << true << false;
+    QTest::newRow("string")
+            << QJsonValue("abc123") << QStringList {"0"} << QDate() << true << false;
+
+    QTest::newRow("array: valid '1/x/1'")
+            << QJsonValue(inputArray)
+            << QStringList {"1", "x", "1"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("array: valid '1/y/b'")
+            << QJsonValue(inputArray)
+            << QStringList {"1", "y", "b"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+
+    QTest::newRow("object: valid 'b/1/x/1'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "1", "x", "1"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("object: valid 'b/1/y/b'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "1", "y", "b"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+    QTest::newRow("object: valid 'c'")
+            << QJsonValue(inputObject)
+            << QStringList {"c"}
+            << QDate(2020, 1, 1)
+            << true
+            << true;
+
+    QTest::newRow("array: not deserialized -1")
+            << QJsonValue(inputArray) << QStringList {"-1"} << QDate() << true << false;
+    QTest::newRow("array: not deserialized 3")
+            << QJsonValue(inputArray) << QStringList { "3"} << QDate() << true << false;
+
+    QTest::newRow("object: not deserialized ''")
+            << QJsonValue(inputObject) << QStringList {""}  << QDate() << true << false;
+    QTest::newRow("object: not deserialized 'd'")
+            << QJsonValue(inputObject) << QStringList {"d"} << QDate() << true << false;
+
+    // Negative tests
+    QTest::newRow("array: invalid 0")
+            << QJsonValue(inputArray) << QStringList {"0"}           << QDate() << false << false;
+    QTest::newRow("array: invalid '1/x/0'")
+            << QJsonValue(inputArray) << QStringList {"1", "x", "0"} << QDate() << false << false;
+    QTest::newRow("array: invalid '1/y/a'")
+            << QJsonValue(inputArray) << QStringList {"1", "y", "a"} << QDate() << false << false;
+
+    QTest::newRow("object: invalid 'a'")
+            << QJsonValue(inputObject)
+            << QStringList {"a"}
+            << QDate()
+            << false
+            << false;
+    QTest::newRow("object: invalid 'b/0'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "0"}
+            << QDate()
+            << false
+            << false;
+    QTest::newRow("object: invalid 'b/1/x/0'")
+            << QJsonValue(inputObject)
+            << QStringList {"b", "1", "x", "0"}
+            << QDate()
+            << false
+            << false;
 }
 
 // Main function -----------------------------------------------------------------------------------
