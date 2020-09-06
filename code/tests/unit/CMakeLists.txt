@@ -39,6 +39,7 @@ endfunction()
 # --------------------------------------------------------------------------------------------------
 # Unit tests
 # --------------------------------------------------------------------------------------------------
+add_subdirectory(Deserialization)
 add_subdirectory(Query)
 add_subdirectory(Serialization)
 

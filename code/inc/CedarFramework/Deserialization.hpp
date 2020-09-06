@@ -684,7 +684,7 @@ bool deserialize(const QJsonValue &json, QMap<K, V> *value)
         // Deserialize value
         V deserializedValue;
 
-        if (deserialize(it.value(), &deserializedValue))
+        if (!deserialize(it.value(), &deserializedValue))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the map item's value with key:")
@@ -733,7 +733,7 @@ bool deserialize(const QJsonValue &json, std::map<K, V> *value)
         // Deserialize value
         V deserializedValue;
 
-        if (deserialize(it.value(), &deserializedValue))
+        if (!deserialize(it.value(), &deserializedValue))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the map item's value with key:")
@@ -782,7 +782,7 @@ bool deserialize(const QJsonValue &json, QHash<K, V> *value)
         // Deserialize value
         V deserializedValue;
 
-        if (deserialize(it.value(), &deserializedValue))
+        if (!deserialize(it.value(), &deserializedValue))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the hash item's value with key:")
@@ -831,7 +831,7 @@ bool deserialize(const QJsonValue &json, std::unordered_map<K, V> *value)
         // Deserialize value
         V deserializedValue;
 
-        if (deserialize(it.value(), &deserializedValue))
+        if (!deserialize(it.value(), &deserializedValue))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the unordered map item's value with "
@@ -880,7 +880,7 @@ bool deserialize(const QJsonValue &json, QMultiMap<K, V> *value)
         // Deserialize values
         QList<V> deserializedValues;
 
-        if (deserialize(it.value(), &deserializedValues))
+        if (!deserialize(it.value(), &deserializedValues))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the multi map item's value with key:")
@@ -932,7 +932,7 @@ bool deserialize(const QJsonValue &json, QMultiHash<K, V> *value)
         // Deserialize values
         QList<V> deserializedValues;
 
-        if (deserialize(it.value(), &deserializedValues))
+        if (!deserialize(it.value(), &deserializedValues))
         {
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QStringLiteral("Failed to deserialize the multi hash item's value with key:")
@@ -954,7 +954,7 @@ bool deserialize(const QJsonValue &json, QMultiHash<K, V> *value)
 template<typename T>
 bool deserializeKey(const QString &value, T *key)
 {
-    Q_ASSERT(value != nullptr);
+    Q_ASSERT(key != nullptr);
 
     return deserialize(QJsonValue(value), key);
 }

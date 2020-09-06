@@ -154,9 +154,9 @@ bool convertIntegerValue(const double inputValue, T_OUT *outputValue)
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("Value [%1] is out of range for the its data type "
                            "(min: [%2], max: [%3])!")
-                   .arg(inputValue)
-                   .arg(lowwerLimit)
-                   .arg(upperLimit);
+                   .arg(inputValue, 0, 'f')
+                   .arg(lowwerLimit, 0, 'f')
+                   .arg(upperLimit, 0, 'f');
         return false;
     }
 
@@ -241,9 +241,9 @@ bool convertFloatingPointValue(const double inputValue, float *outputValue)
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("Parameter value [%1] is out of range for the its data type "
                            "(min: [%2], max: [%3])!")
-                   .arg(inputValue)
-                   .arg(lowwerLimit)
-                   .arg(upperLimit);
+                   .arg(inputValue, 0, 'f')
+                   .arg(lowwerLimit, 0, 'f')
+                   .arg(upperLimit, 0, 'f');
         return false;
     }
 
@@ -459,6 +459,7 @@ bool deserialize(const QJsonValue &json, float *value)
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QString("Value [%1] is not a valid floating-point number!")
                        .arg(json.toString());
+            return false;
         }
 
         return Internal::convertFloatingPointValue(doubleValue, value);
@@ -478,7 +479,8 @@ bool deserialize(const QJsonValue &json, double *value)
 
     if (json.isDouble())
     {
-        return json.toDouble();
+        *value = json.toDouble();
+        return true;
     }
 
     if (json.isString())
@@ -491,6 +493,7 @@ bool deserialize(const QJsonValue &json, double *value)
             qCWarning(CedarFramework::LoggingCategory::Deserialization)
                     << QString("Value [%1] is not a valid floating-point number!")
                        .arg(json.toString());
+            return false;
         }
 
         return true;
@@ -517,7 +520,7 @@ bool deserialize(const QJsonValue &json, QChar *value)
 
     const QString stringValue = json.toString();
 
-    if (stringValue.size() != 2)
+    if (stringValue.size() != 1)
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("JSON value contains more than one character:") << stringValue;
@@ -619,7 +622,7 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
 
     QByteArray encodedBits;
 
-    if (!deserialize(jsonObject.value(QStringLiteral("encoded_bits")), &bitCount))
+    if (!deserialize(jsonObject.value(QStringLiteral("encoded_bits")), &encodedBits))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("Failed to deserialize the member 'encoded_bits' of a bit array:")
@@ -854,7 +857,7 @@ bool deserialize(const QJsonValue &json, QUrl *value)
 
     value->setUrl(stringValue);
 
-    if (!value->isValid())
+    if ((!value->isValid()) && (!stringValue.isEmpty()))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("The value [%1] doesn't represent an URL value")
@@ -883,7 +886,8 @@ bool deserialize(const QJsonValue &json, QUuid *value)
 
     *value = QUuid::fromString(stringValue);
 
-    if (!value->isNull())
+    if (value->isNull() &&
+        (stringValue != QStringLiteral("{00000000-0000-0000-0000-000000000000}")))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("The value [%1] doesn't represent an UUID value")
@@ -1033,7 +1037,7 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
 
     QStringList options;
 
-    if (!deserialize(jsonObject.value(QStringLiteral("options")), &pattern))
+    if (!deserialize(jsonObject.value(QStringLiteral("options")), &options))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("Failed to deserialize the member 'options' of a "
@@ -1426,7 +1430,7 @@ bool deserialize(const QJsonValue &json, QLineF *value)
         return false;
     }
 
-    value->setPoints(QPoint(x1, y1), QPoint(x2, y2));
+    value->setPoints(QPointF(x1, y1), QPointF(x2, y2));
     return true;
 }
 
