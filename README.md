@@ -64,10 +64,10 @@ The following table shows how the supported native types are serialized to JSON:
 | QCborArray                | *JSON Array*
 | QCborMap                  | *JSON Object*
 | QCborSimpleType           | *JSON Value*:<br><ul><li>QCborSimpleType::False and QCborSimpleType::True (*JSON Boolean*)</li><li>QCborSimpleType::Null (*JSON Null*)</li></ul>
-| QPair<T1, T2><br>std::pair<T1, T2> | *JSON Object* with:<br><ul><li>"first" (serialized *T1* type)</li><li>"second" (serialized *T2* type)</li></ul>
+| QPair<T1,T2><br>std::pair<T1,T2> | *JSON Object* with:<br><ul><li>"first" (serialized *T1* type)</li><li>"second" (serialized *T2* type)</li></ul>
 | QStringList<br>QList\<T><br>std::list\<T><br>QVector\<T><br>std::vector\<T><br>QSet\<T> | *JSON Array*
-| QMap<K, V><br>std::map<K, V><br>QHash<K, V><br>std::unordered_map<K, V> | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
-| QMultiMap<K, V><br>QMultiHash<K, V> | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Array*
+| QMap<K,V><br>std::map<K,V><br>QHash<K,V><br>std::unordered_map<K,V> | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
+| QMultiMap<K,V><br>QMultiHash<K,V> | *JSON Object* with the key serialized to *JSON String* and the values serialized to *JSON Array*
 
 **Note: a *JSON Value* can be deserialized to a QVariant value only as a direct conversion of QJsonValue to QVariant because the exact native type of the originally serialized value is not available!**
 
