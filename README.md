@@ -8,8 +8,6 @@ This library provides the following features:
 
 ## Querying nodes
 
-Note: The *query module* only works with *JSON Array* or *JSON Object* as the root node.
-
 The *CedarFramework::hasNode()* function checks if a JSON data structure contains a sub-node:
 
 * at index (*JSON Array*)
@@ -21,6 +19,8 @@ The *CedarFramework::getNode()* function extracts a sub-node from a JSON data st
 * at index (*JSON Array*)
 * with name (*JSON Object*)
 * at path (sequence of indexes and/or names)
+
+**Note: The *query module* only works with *JSON Array* or *JSON Object* as the root node.**
 
 ## Serialization
 
@@ -42,21 +42,20 @@ The following table shows how the supported native types are serialized to JSON:
 | *strings*                 | All string types are stored a *JSON String*
 | QChar                     | *JSON String*
 | QByteArray                | Base64 encoded *JSON String*
-| QBitArray                 | *JSON Object* with:<br>* "bit_count" (*JSON Number*) <br>* "encoded_bits" (Base64 encoded *JSON String*)
+| QBitArray                 | *JSON Object* with:<br><ul><li>"bit_count" (*JSON Number*)</li><li>"encoded_bits" (Base64 encoded *JSON String*)</li></ul>
 | QDate                     | *JSON String* in ISO 8601 format (yyyy-MM-dd)
 | QTime                     | *JSON String* in ISO 8601 format with millisecond percision (HH:mm:ss.sss)
-| QDateTime                 | *JSON String* in ISO 8601 format with millisecond percision (yyyy-MM-ddTHH:mm:ss.sssTZ) where *TZ* is:<br>* empty for local time<br>* "Z" for UTC time<br>* "[+\|-]HH:mm" for offset from UTC
-| QVariant                  | * serialized according to the actual type in the QVariant value<br>* deserialized as a direct conversion of QJsonValue to QVariant (exact native type of the originally serialized value is not available!)
+| QDateTime                 | *JSON String* in ISO 8601 format with millisecond percision (yyyy-MM-ddTHH:mm:ss.sssTZ) where *TZ* is:<br><ul><li>empty for local time</li><li>"Z" for UTC time</li><li>"[+\|-]HH:mm" for offset from UTC</li></ul>
+| QVariant                  | Serialized according to the actual type in the QVariant value
 | QUrl                      | *JSON String*
 | QUuid                     | *JSON String*
 | QLocale                   | *JSON String* in BCP47 format
-| QRegExp                   | *JSON Object* with:<br>* "pattern" (*JSON String*)<br>* "case_sensitive" (*JSON Boolean*)<br>* "syntax" (*JSON String* representation of QRegExp::PatternSyntax)
-| QRegularExpression        | *JSON Object* with:<br>* "pattern" (*JSON String*)<br>* "options" (*JSON Array* representation of QRegularExpression::PatternOptions)
-| QSize and QSizeF          | *JSON Object* with:<br>* "width" (*JSON Number* or *String*)<br>* "height" (*JSON Number* or *String*)
-| QPoint and QPointF        | *JSON Object* with:<br>* "x" (*JSON Number* or *String*)<br>* "y" (*JSON Number* or *String*)
-| QLine and QLineF          | *JSON Object* with:<br>* "x1" (*JSON Number* or *String*)<br>* "y1" (*JSON Number* or *String*)<br>* "x2" (*JSON Number* or *String*)<br>* "y2" (*JSON Number* or *String*)
-| QRect and QRectF          | *JSON Object* with:<br>* "x" (*JSON Number* or *String*)<br>* "y" (*JSON Number* or *String*)<br>* "width" (*JSON Number* or *String*)<br>* "height" (*JSON Number* or *String*)
-| QStringList               | *JSON Array*
+| QRegExp                   | *JSON Object* with:<br><ul><li>"pattern" (*JSON String*)</li><li>"case_sensitive" (*JSON Boolean*)</li><li>"syntax" (*JSON String* representation of QRegExp::PatternSyntax)</li></ul>
+| QRegularExpression        | *JSON Object* with:<br><ul><li>"pattern" (*JSON String*)</li><li>"options" (*JSON Array* representation of QRegularExpression::PatternOptions)</li></ul>
+| QSize<br>QSizeF           | *JSON Object* with:<br><ul><li>"width" (*JSON Number* or *String*)</li><li>"height" (*JSON Number* or *String*)</li></ul>
+| QPoint<br>QPointF         | *JSON Object* with:<br><ul><li>"x" (*JSON Number* or *String*)</li><li>"y" (*JSON Number* or *String*)</li></ul>
+| QLine<br>QLineF           | *JSON Object* with:<br><ul><li>"x1" (*JSON Number* or *String*)</li><li>"y1" (*JSON Number* or *String*)</li><li>"x2" (*JSON Number* or *String*)</li><li>"y2" (*JSON Number* or *String*)</li></ul>
+| QRect<br>QRectF           | *JSON Object* with:<br><ul><li>"x" (*JSON Number* or *String*)</li><li>"y" (*JSON Number* or *String*)</li><li>"width" (*JSON Number* or *String*)</li><li>"height" (*JSON Number* or *String*)</li></ul>
 | QJsonValue                | *JSON Value*
 | QJsonArray                | *JSON Array*
 | QJsonObject               | *JSON Object*
@@ -64,22 +63,15 @@ The following table shows how the supported native types are serialized to JSON:
 | QCborValue                | *JSON Value*
 | QCborArray                | *JSON Array*
 | QCborMap                  | *JSON Object*
-| QCborSimpleType           | *JSON Value*:<br>* QCborSimpleType::False and QCborSimpleType::True (*JSON Boolean*)<br>* QCborSimpleType::Null (*JSON Null*)
-| QPair<T1, T2>             | *JSON Object* with:<br>* "first" (serialized *T1* type)<br>* "second" (serialized *T2* type)
-| std::pair<T1, T2>         | *JSON Object* with:<br>* "first" (serialized *T1* type)<br>* "second" (serialized *T2* type)
-| QList\<T>                 | *JSON Array*
-| std::list\<T>             | *JSON Array*
-| QVector\<T>               | *JSON Array*
-| std::vector\<T>           | *JSON Array*
-| QSet\<T>                  | *JSON Array*
-| QMap<K, V>                | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
-| std::map<K, V>            | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
-| QHash<K, V>               | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
-| std::unordered_map<K, V>  | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
-| QMultiMap<K, V>           | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Array*
-| QMultiHash<K, V>          | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Array*
+| QCborSimpleType           | *JSON Value*:<br><ul><li>QCborSimpleType::False and QCborSimpleType::True (*JSON Boolean*)</li><li>QCborSimpleType::Null (*JSON Null*)</li></ul>
+| QPair<T1, T2><br>std::pair<T1, T2> | *JSON Object* with:<br><ul><li>"first" (serialized *T1* type)</li><li>"second" (serialized *T2* type)</li></ul>
+| QStringList<br>QList\<T><br>std::list\<T><br>QVector\<T><br>std::vector\<T><br>QSet\<T> | *JSON Array*
+| QMap<K, V><br>std::map<K, V><br>QHash<K, V><br>std::unordered_map<K, V> | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Value*
+| QMultiMap<K, V><br>QMultiHash<K, V> | *JSON Object* with the key serialized to *JSON String* and the value serialized to *JSON Array*
 
-Note: in maps the key must be of a native type that is serializable to either *JSON String" or *JSON Number"!
+**Note: a *JSON Value* can be deserialized to a QVariant value only as a direct conversion of QJsonValue to QVariant because the exact native type of the originally serialized value is not available!**
+
+**Note: in maps the key must be of a native type that is serializable to either *JSON String* or *JSON Number*!**
 
 ## Custom types
 
