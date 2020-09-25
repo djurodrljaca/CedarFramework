@@ -1343,12 +1343,41 @@ void TestSerialization::testSerializeQRegularExpression_data()
         const QJsonObject expectedResult
         {
             { "pattern", "[a-z0-9]+" },
-            { "options", QJsonArray({ "DotMatchesEverything", "Multiline" }) }
+            {
+                "options",
+                QJsonArray
+                {
+                    "DotMatchesEverything",
+                    "Multiline",
+                    "DontAutomaticallyOptimize"
+                }
+            }
         };
-        QTest::newRow("with pattern")
+        QTest::newRow("with pattern 1")
                 << QRegularExpression("[a-z0-9]+",
                                       QRegularExpression::DotMatchesEverythingOption |
-                                      QRegularExpression::MultilineOption)
+                                      QRegularExpression::MultilineOption |
+                                      QRegularExpression::DontAutomaticallyOptimizeOption)
+                << QJsonValue(expectedResult);
+    }
+
+    {
+        const QJsonObject expectedResult
+        {
+            { "pattern", "^[a-z]+$" },
+            {
+                "options",
+                QJsonArray
+                {
+                    "UseUnicodeProperties",
+                    "OptimizeOnFirstUsage"
+                }
+            }
+        };
+        QTest::newRow("with pattern 2")
+                << QRegularExpression("^[a-z]+$",
+                                      QRegularExpression::UseUnicodePropertiesOption |
+                                      QRegularExpression::OptimizeOnFirstUsageOption)
                 << QJsonValue(expectedResult);
     }
 }
@@ -1966,7 +1995,7 @@ void TestSerialization::testSerializeQPair_data()
     }
 }
 
-// Test: serialize<std::pair>() method -----------------------------------------------------------------
+// Test: serialize<std::pair>() method -------------------------------------------------------------
 
 using StdPairStringInt = std::pair<QString, int>;
 
@@ -2007,7 +2036,7 @@ void TestSerialization::testSerializeStdPair_data()
 
 void TestSerialization::testSerializeQList()
 {
-    QFETCH(QList<int>, input);
+    QFETCH(QList<QVariant>, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2016,14 +2045,19 @@ void TestSerialization::testSerializeQList()
 
 void TestSerialization::testSerializeQList_data()
 {
-    QTest::addColumn<QList<int>>("input");
+    QTest::addColumn<QList<QVariant>>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QList<int>() << QJsonValue(QJsonArray());
+    QTest::newRow("empty") << QList<QVariant>() << QJsonValue(QJsonArray());
 
     {
-        const QList<int> input { -1, 0, 1 };
+        const QList<QVariant> input { -1, 0, 1 };
         QTest::newRow("non-empty") << input << QJsonValue(QJsonArray { -1, 0, 1 } );
+    }
+
+    {
+        const QList<QVariant> input { QVariant(QVariant::Invalid) };
+        QTest::newRow("invalid") << input << QJsonValue(QJsonValue::Undefined);
     }
 }
 
@@ -2031,7 +2065,7 @@ void TestSerialization::testSerializeQList_data()
 
 void TestSerialization::testSerializeStdList()
 {
-    QFETCH(std::list<int>, input);
+    QFETCH(std::list<QVariant>, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2040,14 +2074,19 @@ void TestSerialization::testSerializeStdList()
 
 void TestSerialization::testSerializeStdList_data()
 {
-    QTest::addColumn<std::list<int>>("input");
+    QTest::addColumn<std::list<QVariant>>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << std::list<int>() << QJsonValue(QJsonArray());
+    QTest::newRow("empty") << std::list<QVariant>() << QJsonValue(QJsonArray());
 
     {
-        const std::list<int> input { -1, 0, 1 };
+        const std::list<QVariant> input { -1, 0, 1 };
         QTest::newRow("non-empty") << input << QJsonValue(QJsonArray { -1, 0, 1 } );
+    }
+
+    {
+        const std::list<QVariant> input { QVariant(QVariant::Invalid) };
+        QTest::newRow("invalid") << input << QJsonValue(QJsonValue::Undefined);
     }
 }
 
@@ -2055,7 +2094,7 @@ void TestSerialization::testSerializeStdList_data()
 
 void TestSerialization::testSerializeQVector()
 {
-    QFETCH(QVector<int>, input);
+    QFETCH(QVector<QVariant>, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2064,14 +2103,19 @@ void TestSerialization::testSerializeQVector()
 
 void TestSerialization::testSerializeQVector_data()
 {
-    QTest::addColumn<QVector<int>>("input");
+    QTest::addColumn<QVector<QVariant>>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QVector<int>() << QJsonValue(QJsonArray());
+    QTest::newRow("empty") << QVector<QVariant>() << QJsonValue(QJsonArray());
 
     {
-        const QVector<int> input { -1, 0, 1 };
+        const QVector<QVariant> input { -1, 0, 1 };
         QTest::newRow("non-empty") << input << QJsonValue(QJsonArray { -1, 0, 1 } );
+    }
+
+    {
+        const QVector<QVariant> input { QVariant(QVariant::Invalid) };
+        QTest::newRow("invalid") << input << QJsonValue(QJsonValue::Undefined);
     }
 }
 
@@ -2079,7 +2123,7 @@ void TestSerialization::testSerializeQVector_data()
 
 void TestSerialization::testSerializeStdVector()
 {
-    QFETCH(std::vector<int>, input);
+    QFETCH(std::vector<QVariant>, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2088,14 +2132,19 @@ void TestSerialization::testSerializeStdVector()
 
 void TestSerialization::testSerializeStdVector_data()
 {
-    QTest::addColumn<std::vector<int>>("input");
+    QTest::addColumn<std::vector<QVariant>>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << std::vector<int>() << QJsonValue(QJsonArray());
+    QTest::newRow("empty") << std::vector<QVariant>() << QJsonValue(QJsonArray());
 
     {
-        const std::vector<int> input { -1, 0, 1 };
+        const std::vector<QVariant> input { -1, 0, 1 };
         QTest::newRow("non-empty") << input << QJsonValue(QJsonArray { -1, 0, 1 } );
+    }
+
+    {
+        const std::vector<QVariant> input { QVariant(QVariant::Invalid) };
+        QTest::newRow("invalid") << input << QJsonValue(QJsonValue::Undefined);
     }
 }
 
@@ -2136,11 +2185,11 @@ void TestSerialization::testSerializeQSet_data()
 
 // Test: serialize<QMap>() method -----------------------------------------------------------
 
-using QMapIntString = QMap<int, QString>;
+using QMapVariantVariant = QMap<QVariant, QVariant>;
 
 void TestSerialization::testSerializeQMap()
 {
-    QFETCH(QMapIntString, input);
+    QFETCH(QMapVariantVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2149,13 +2198,13 @@ void TestSerialization::testSerializeQMap()
 
 void TestSerialization::testSerializeQMap_data()
 {
-    QTest::addColumn<QMapIntString>("input");
+    QTest::addColumn<QMapVariantVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QMapIntString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << QMapVariantVariant() << QJsonValue(QJsonObject());
 
     {
-        const QMapIntString input
+        const QMapVariantVariant input
         {
             { -1, "a" },
             {  0, "b" },
@@ -2169,15 +2218,25 @@ void TestSerialization::testSerializeQMap_data()
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
+
+    {
+        const QMapVariantVariant input { { QPoint(0, 0), "a" } };
+        QTest::newRow("invalid key") << input << QJsonValue(QJsonValue::Undefined);
+    }
+
+    {
+        const QMapVariantVariant input { { 0, QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
+    }
 }
 
 // Test: serialize<std::map>() method -----------------------------------------------------------
 
-using StdMapIntString = std::map<int, QString>;
+using StdMapVariantVariant = std::map<QVariant, QVariant>;
 
 void TestSerialization::testSerializeStdMap()
 {
-    QFETCH(StdMapIntString, input);
+    QFETCH(StdMapVariantVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2186,13 +2245,13 @@ void TestSerialization::testSerializeStdMap()
 
 void TestSerialization::testSerializeStdMap_data()
 {
-    QTest::addColumn<StdMapIntString>("input");
+    QTest::addColumn<StdMapVariantVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << StdMapIntString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << StdMapVariantVariant() << QJsonValue(QJsonObject());
 
     {
-        const StdMapIntString input
+        const StdMapVariantVariant input
         {
             { -1, "a" },
             {  0, "b" },
@@ -2206,15 +2265,25 @@ void TestSerialization::testSerializeStdMap_data()
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
+
+    {
+        const StdMapVariantVariant input { { QPoint(0, 0), "a" } };
+        QTest::newRow("invalid key") << input << QJsonValue(QJsonValue::Undefined);
+    }
+
+    {
+        const StdMapVariantVariant input { { 0, QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
+    }
 }
 
 // Test: serialize<QHash>() method -----------------------------------------------------------
 
-using QHashQDateString = QHash<QDate, QString>;
+using QHashDateVariant = QHash<QDate, QVariant>;
 
 void TestSerialization::testSerializeQHash()
 {
-    QFETCH(QHashQDateString, input);
+    QFETCH(QHashDateVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2223,13 +2292,13 @@ void TestSerialization::testSerializeQHash()
 
 void TestSerialization::testSerializeQHash_data()
 {
-    QTest::addColumn<QHashQDateString>("input");
+    QTest::addColumn<QHashDateVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QHashQDateString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << QHashDateVariant() << QJsonValue(QJsonObject());
 
     {
-        const QHashQDateString input
+        const QHashDateVariant input
         {
             { QDate(2020, 1, 1), "a" },
             { QDate(2020, 1, 2), "b" },
@@ -2243,16 +2312,21 @@ void TestSerialization::testSerializeQHash_data()
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
+
+    {
+        const QHashDateVariant input { { QDate(2020, 1, 1), QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
+    }
 }
 
 // Test: serialize<QHash>() method -----------------------------------------------------------
 
-using StdUnorderedMapIntString = std::unordered_map<int, QString>;
-Q_DECLARE_METATYPE(StdUnorderedMapIntString)
+using StdUnorderedMapIntVariant = std::unordered_map<int, QVariant>;
+Q_DECLARE_METATYPE(StdUnorderedMapIntVariant)
 
 void TestSerialization::testSerializeStdUnorderedMap()
 {
-    QFETCH(StdUnorderedMapIntString, input);
+    QFETCH(StdUnorderedMapIntVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2261,13 +2335,13 @@ void TestSerialization::testSerializeStdUnorderedMap()
 
 void TestSerialization::testSerializeStdUnorderedMap_data()
 {
-    QTest::addColumn<StdUnorderedMapIntString>("input");
+    QTest::addColumn<StdUnorderedMapIntVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << StdUnorderedMapIntString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << StdUnorderedMapIntVariant() << QJsonValue(QJsonObject());
 
     {
-        const StdUnorderedMapIntString input
+        const StdUnorderedMapIntVariant input
         {
             { -1, "a" },
             {  0, "b" },
@@ -2281,16 +2355,21 @@ void TestSerialization::testSerializeStdUnorderedMap_data()
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
+
+    {
+        const StdUnorderedMapIntVariant input { { 0, QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
+    }
 }
 
 // Test: serialize<QMultiMap>() method -----------------------------------------------------------
 
-using QMultiMapIntString = QMultiMap<int, QString>;
-Q_DECLARE_METATYPE(QMultiMapIntString)
+using QMultiMapVariantVariant = QMultiMap<QVariant, QVariant>;
+Q_DECLARE_METATYPE(QMultiMapVariantVariant)
 
 void TestSerialization::testSerializeQMultiMap()
 {
-    QFETCH(QMultiMapIntString, input);
+    QFETCH(QMultiMapVariantVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2299,13 +2378,13 @@ void TestSerialization::testSerializeQMultiMap()
 
 void TestSerialization::testSerializeQMultiMap_data()
 {
-    QTest::addColumn<QMultiMapIntString>("input");
+    QTest::addColumn<QMultiMapVariantVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QMultiMapIntString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << QMultiMapVariantVariant() << QJsonValue(QJsonObject());
 
     {
-        const QMultiMapIntString input
+        const QMultiMapVariantVariant input
         {
             { -1, "a1" },
             { -1, "a2" },
@@ -2325,16 +2404,26 @@ void TestSerialization::testSerializeQMultiMap_data()
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
+
+    {
+        const QMultiMapVariantVariant input { { QPoint(0, 0), "a" } };
+        QTest::newRow("invalid key") << input << QJsonValue(QJsonValue::Undefined);
+    }
+
+    {
+        const QMultiMapVariantVariant input { { 0, QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
+    }
 }
 
 // Test: serialize<QMultiHash>() method -----------------------------------------------------------
 
-using QMultiHashIntString = QMultiHash<int, QString>;
-Q_DECLARE_METATYPE(QMultiHashIntString)
+using QMultiHashIntVariant = QMultiHash<int, QVariant>;
+Q_DECLARE_METATYPE(QMultiHashIntVariant)
 
 void TestSerialization::testSerializeQMultiHash()
 {
-    QFETCH(QMultiHashIntString, input);
+    QFETCH(QMultiHashIntVariant, input);
     QFETCH(QJsonValue, expectedResult);
 
     const auto result = CedarFramework::serialize(input);
@@ -2343,13 +2432,13 @@ void TestSerialization::testSerializeQMultiHash()
 
 void TestSerialization::testSerializeQMultiHash_data()
 {
-    QTest::addColumn<QMultiHashIntString>("input");
+    QTest::addColumn<QMultiHashIntVariant>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    QTest::newRow("empty") << QMultiHashIntString() << QJsonValue(QJsonObject());
+    QTest::newRow("empty") << QMultiHashIntVariant() << QJsonValue(QJsonObject());
 
     {
-        const QMultiHashIntString input
+        const QMultiHashIntVariant input
         {
             { -1, "a1" },
             { -1, "a2" },
@@ -2368,6 +2457,11 @@ void TestSerialization::testSerializeQMultiHash_data()
             {  "1", QJsonArray { "c3", "c2", "c1" } }
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
+    }
+
+    {
+        const QMultiHashIntVariant input { { 0, QVariant(QVariant::Invalid) } };
+        QTest::newRow("invalid value") << input << QJsonValue(QJsonValue::Undefined);
     }
 }
 

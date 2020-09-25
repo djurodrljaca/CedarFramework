@@ -481,13 +481,6 @@ QJsonValue serialize(const QMap<K, V> &value)
             return QJsonValue(QJsonValue::Undefined);
         }
 
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
         // Serialize value
         const QJsonValue serializedValue = serialize(it.value());
 
@@ -522,13 +515,6 @@ QJsonValue serialize(const std::map<K, V> &value)
         {
             qCWarning(CedarFramework::LoggingCategory::Serialization)
                     << QStringLiteral("Failed to serialize the item's key");
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
             return QJsonValue(QJsonValue::Undefined);
         }
 
@@ -569,13 +555,6 @@ QJsonValue serialize(const QHash<K, V> &value)
             return QJsonValue(QJsonValue::Undefined);
         }
 
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
         // Serialize value
         const QJsonValue serializedValue = serialize(it.value());
 
@@ -610,13 +589,6 @@ QJsonValue serialize(const std::unordered_map<K, V> &value)
         {
             qCWarning(CedarFramework::LoggingCategory::Serialization)
                     << QStringLiteral("Failed to serialize the item's key");
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
             return QJsonValue(QJsonValue::Undefined);
         }
 
@@ -657,13 +629,6 @@ QJsonValue serialize(const QMultiMap<K, V> &value)
             return QJsonValue(QJsonValue::Undefined);
         }
 
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
         // Serialize value
         const QJsonValue serializedValue = serialize(value.values(key));
 
@@ -698,13 +663,6 @@ QJsonValue serialize(const QMultiHash<K, V> &value)
         {
             qCWarning(CedarFramework::LoggingCategory::Serialization)
                     << QStringLiteral("Failed to serialize the item's key");
-            return QJsonValue(QJsonValue::Undefined);
-        }
-
-        if (object.contains(serializedKey))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Serialization)
-                    << QStringLiteral("Duplicate key:") << serializedKey;
             return QJsonValue(QJsonValue::Undefined);
         }
 
