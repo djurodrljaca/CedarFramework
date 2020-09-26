@@ -181,10 +181,6 @@ void createIntegerTestData()
     if (std::is_signed<T>::value)
     {
         // Positive tests
-        QTest::newRow("Double: min")
-                << QJsonValue(static_cast<double>(std::numeric_limits<T>::lowest()))
-                << static_cast<T>(static_cast<double>(std::numeric_limits<T>::lowest()))
-                << true;
         QTest::newRow("Double: -9007199254740992")
                 << QJsonValue(-9007199254740992.0) << static_cast<T>(-9007199254740992LL) << true;
         QTest::newRow("Double: -1") << QJsonValue(-1.0) << static_cast<T>(-1) << true;
@@ -192,10 +188,6 @@ void createIntegerTestData()
         QTest::newRow("Double: +1") << QJsonValue( 1.0) << static_cast<T>( 1) << true;
         QTest::newRow("Double: +9007199254740992")
                 << QJsonValue(9007199254740992.0) << static_cast<T>(9007199254740992LL) << true;
-        QTest::newRow("Double: max")
-                << QJsonValue(static_cast<double>(std::numeric_limits<T>::max()))
-                << static_cast<T>(static_cast<double>(std::numeric_limits<T>::max()))
-                << true;
 
         QTest::newRow("String: min")
                 << QJsonValue(QString::number(std::numeric_limits<T>::lowest()))
@@ -268,10 +260,6 @@ void createIntegerTestData()
         QTest::newRow("Double: +1") << QJsonValue( 1.0) << static_cast<T>( 1) << true;
         QTest::newRow("Double: +9007199254740992")
                 << QJsonValue(9007199254740992.0) << static_cast<T>(9007199254740992LL) << true;
-        QTest::newRow("Double: max")
-                << QJsonValue(static_cast<double>(std::numeric_limits<T>::max()))
-                << static_cast<T>(static_cast<double>(std::numeric_limits<T>::max()))
-                << true;
 
         QTest::newRow("String:  0")
                 << QJsonValue(QString::number( 0.0)) << static_cast<T>( 0) << true;
