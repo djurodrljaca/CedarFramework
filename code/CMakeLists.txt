@@ -11,13 +11,37 @@
 # You should have received a copy of the GNU Lesser General Public License along with C++ Config
 # Framework. If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 project(CedarFramework VERSION 1.0.0)
 
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt5 COMPONENTS Core REQUIRED)
+
+# --------------------------------------------------------------------------------------------------
+# Code Coverage
+# --------------------------------------------------------------------------------------------------
+option(CedarFramework_CodeCoverage "Cedar Framework Code Coverage" OFF)
+
+if (CedarFramework_CodeCoverage MATCHES ON)
+    include(cmake/CodeCoverage.cmake)
+    APPEND_COVERAGE_COMPILER_FLAGS()
+
+    set(excludes_cmake_prefix_path)
+    foreach(item ${CMAKE_PREFIX_PATH})
+        get_filename_component(item ${item} ABSOLUTE)
+        list(APPEND excludes_cmake_prefix_path "'${item}/*'")
+    endforeach()
+
+    set(CedarFramework_CodeCoverage_EXCLUDES
+            "'/opt/*'"
+            "'/usr/*'"
+            ${excludes_cmake_prefix_path}
+            "'${CMAKE_SOURCE_DIR}/tests/*'"
+            "'${CMAKE_BINARY_DIR}/*'"
+        )
+endif()
 
 # --------------------------------------------------------------------------------------------------
 # CedarFramework library
@@ -111,30 +135,6 @@ install(
         DESTINATION ${ConfigPackageLocation}
         COMPONENT   Devel
     )
-
-# --------------------------------------------------------------------------------------------------
-# Code Coverage
-# --------------------------------------------------------------------------------------------------
-option(CedarFramework_CodeCoverage "Cedar Framework Code Coverage" OFF)
-
-if (CedarFramework_CodeCoverage MATCHES ON)
-    include(cmake/CodeCoverage.cmake)
-    APPEND_COVERAGE_COMPILER_FLAGS()
-
-    set(excludes_cmake_prefix_path)
-    foreach(item ${CMAKE_PREFIX_PATH})
-        get_filename_component(item ${item} ABSOLUTE)
-        list(APPEND excludes_cmake_prefix_path "'${item}/*'")
-    endforeach()
-
-    set(CedarFramework_CodeCoverage_EXCLUDES
-            "'/opt/*'"
-            "'/usr/*'"
-            ${excludes_cmake_prefix_path}
-            "'${CMAKE_SOURCE_DIR}/tests/*'"
-            "'${CMAKE_BINARY_DIR}/*'"
-        )
-endif()
 
 # --------------------------------------------------------------------------------------------------
 # Tests
