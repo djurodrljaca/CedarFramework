@@ -37,15 +37,15 @@ The following table shows how the supported native types are serialized to JSON:
 | Native type               | JSON representation
 | ------------------------- | -------------------
 | bool                      | *JSON Boolean*
-| *integers*                | Integers that can be stored in a *double* without loss of percision (between -9,007,199,254,740,992 and 9,007,199,254,740,992) are stored as a *JSON Number* all others are stored as a *JSON String*
+| *integers*                | Integers that can be stored in a *double* without loss of precision (between -9,007,199,254,740,992 and 9,007,199,254,740,992) are stored as a *JSON Number* all others are stored as a *JSON String*
 | *floating point*          | All floating point values are stored as a *Number*
 | *strings*                 | All string types are stored a *JSON String*
 | QChar                     | *JSON String*
 | QByteArray                | Base64 encoded *JSON String*
 | QBitArray                 | *JSON Object* with:<br><ul><li>"bit_count" (*JSON Number*)</li><li>"encoded_bits" (Base64 encoded *JSON String*)</li></ul>
 | QDate                     | *JSON String* in ISO 8601 format (yyyy-MM-dd)
-| QTime                     | *JSON String* in ISO 8601 format with millisecond percision (HH:mm:ss.sss)
-| QDateTime                 | *JSON String* in ISO 8601 format with millisecond percision (yyyy-MM-ddTHH:mm:ss.sssTZ) where *TZ* is:<br><ul><li>empty for local time</li><li>"Z" for UTC time</li><li>"[+\|-]HH:mm" for offset from UTC</li></ul>
+| QTime                     | *JSON String* in ISO 8601 format with millisecond precision (HH:mm:ss.sss)
+| QDateTime                 | *JSON String* in ISO 8601 format with millisecond precision (yyyy-MM-ddTHH:mm:ss.sssTZ) where *TZ* is:<br><ul><li>empty for local time</li><li>"Z" for UTC time</li><li>"[+\|-]HH:mm" for offset from UTC</li></ul>
 | QVariant                  | Serialized according to the actual type in the QVariant value
 | QUrl                      | *JSON String*
 | QUuid                     | *JSON String*
@@ -75,4 +75,4 @@ The following table shows how the supported native types are serialized to JSON:
 
 ## Custom types
 
-The user can create serialization and deserialization functions for native types not supported by the library by creating the specialized *CedarFramework::serialize()* amd *CedarFramework::deserialize()* functions.
+The user can create serialization and deserialization functions for native types not supported by the library by creating the specialized *CedarFramework::serialize()* and *CedarFramework::deserialize()* functions.
