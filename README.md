@@ -6,6 +6,12 @@ This library provides the following features:
 * serialization of data structure to JSON
 * deserialization of data structures from JSON
 
+## Requirements
+
+* CMake v3.5 or later
+* C++14 compliant compiler
+* Qt5 framework (only Core and Test modules)
+
 ## Querying nodes
 
 The *CedarFramework::hasNode()* function checks if a JSON data structure contains a sub-node:
