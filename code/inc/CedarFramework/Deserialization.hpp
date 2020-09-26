@@ -562,6 +562,7 @@ bool deserialize(const QJsonValue &json, QList<T> *value)
 
     // Deserialize elements
     value->clear();
+    value->reserve(jsonArray.size());
     int index = 0;
 
     for (const auto &item : jsonArray)
@@ -640,6 +641,7 @@ bool deserialize(const QJsonValue &json, QVector<T> *value)
 
     // Deserialize elements
     value->clear();
+    value->reserve(jsonArray.size());
     int index = 0;
 
     for (const auto &item : jsonArray)
@@ -680,6 +682,7 @@ bool deserialize(const QJsonValue &json, std::vector<T> *value)
 
     // Deserialize elements
     value->clear();
+    value->reserve(static_cast<size_t>(jsonArray.size()));
     int index = 0;
 
     for (const auto &item : jsonArray)
@@ -974,7 +977,7 @@ bool deserialize(const QJsonValue &json, QMultiMap<K, V> *value)
         }
 
         // Deserialize values
-        QList<V> deserializedValues;
+        QVector<V> deserializedValues;
 
         if (!deserialize(it.value(), &deserializedValues))
         {
@@ -1026,7 +1029,7 @@ bool deserialize(const QJsonValue &json, QMultiHash<K, V> *value)
         }
 
         // Deserialize values
-        QList<V> deserializedValues;
+        QVector<V> deserializedValues;
 
         if (!deserialize(it.value(), &deserializedValues))
         {
