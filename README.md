@@ -6,7 +6,7 @@ This library provides the following features:
 * serialization of data structure to JSON
 * deserialization of data structures from JSON
 
-## Requirements
+## Build requirements
 
 * CMake v3.5 or later
 * C++14 compliant compiler
