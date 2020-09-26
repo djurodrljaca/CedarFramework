@@ -95,14 +95,25 @@ void createIntegerTestData()
                 << static_cast<T>(0)
                 << false;
 
-        QTest::newRow("String: min - 1")
+        QTest::newRow("String (from double): min - 1")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::lowest()) - 1.0, 'f'))
                 << static_cast<T>(0)
                 << false;
-        QTest::newRow("String: max + 1")
+        QTest::newRow("String (from double): max + 1")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::max()) + 1.0, 'f'))
+                << static_cast<T>(0)
+                << false;
+
+        QTest::newRow("String (from int): min - 1")
+                << QJsonValue(QString::number(
+                                  static_cast<qint64>(std::numeric_limits<T>::lowest()) - 1LL))
+                << static_cast<T>(0)
+                << false;
+        QTest::newRow("String (from int): max + 1")
+                << QJsonValue(QString::number(
+                                  static_cast<qint64>(std::numeric_limits<T>::max()) + 1LL))
                 << static_cast<T>(0)
                 << false;
 
@@ -140,10 +151,17 @@ void createIntegerTestData()
                 << static_cast<T>(0)
                 << false;
 
-        QTest::newRow("String: -1") << QJsonValue("-1.0") << static_cast<T>(0) << false;
-        QTest::newRow("String: max + 1")
+        QTest::newRow("String (from double): -1") << QJsonValue("-1.0") << static_cast<T>(0) << false;
+        QTest::newRow("String (from double): max + 1")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::max()) + 1.0, 'f'))
+                << static_cast<T>(0)
+                << false;
+
+        QTest::newRow("String (from int): -1") << QJsonValue("-1.0") << static_cast<T>(0) << false;
+        QTest::newRow("String (from int): max + 1")
+                << QJsonValue(QString::number(
+                                  static_cast<qint64>(std::numeric_limits<T>::max()) + 1LL))
                 << static_cast<T>(0)
                 << false;
 
@@ -221,14 +239,20 @@ void createIntegerTestData()
                 << static_cast<T>(0)
                 << false;
 
-        QTest::newRow("String: min * 2")
+        QTest::newRow("String (from double): min * 2")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::lowest()) * 2.0, 'f'))
                 << static_cast<T>(0)
                 << false;
-        QTest::newRow("String: max * 2")
+        QTest::newRow("String (from double): max * 2")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::max()) * 2.0, 'f'))
+                << static_cast<T>(0)
+                << false;
+
+        QTest::newRow("String (from uint): max + 1")
+                << QJsonValue(QString::number(
+                                  static_cast<quint64>(std::numeric_limits<T>::max()) + 1))
                 << static_cast<T>(0)
                 << false;
 
@@ -273,12 +297,16 @@ void createIntegerTestData()
                 << static_cast<T>(0)
                 << false;
 
-        QTest::newRow("String: -1") << QJsonValue("-1") << static_cast<T>(0) << false;
-        QTest::newRow("String: max * 2")
+        QTest::newRow("String (from double): -1")
+                << QJsonValue("-1.0") << static_cast<T>(0) << false;
+        QTest::newRow("String (from double): max * 2")
                 << QJsonValue(QString::number(
                                   static_cast<double>(std::numeric_limits<T>::max()) * 2.0, 'f'))
                 << static_cast<T>(0)
                 << false;
+
+        QTest::newRow("String (from int): -1")
+                << QJsonValue("-1") << static_cast<T>(0) << false;
 
         QTest::newRow("String: invalid") << QJsonValue("abc") << static_cast<T>(0) << false;
 
@@ -1202,8 +1230,16 @@ void TestDeserialization::testDeserializeQBitArray_data()
             << QJsonValue(QJsonObject {{ "bit_count", 30 }}) << QBitArray() << false;
     QTest::newRow("Object: missing param 2")
             << QJsonValue(QJsonObject {{ "encoded_bits", "MEEAAA==" }}) << QBitArray() << false;
-    QTest::newRow("Object: invalid param")
+    QTest::newRow("Object: invalid param 1")
             << QJsonValue(QJsonObject { { "bit_count", 10 }, { "encoded_bits", "MEEAAA==" } })
+            << QBitArray()
+            << false;
+    QTest::newRow("Object: invalid param 2")
+            << QJsonValue(QJsonObject { { "bit_count", "" }, { "encoded_bits", "MEEAAA==" } })
+            << QBitArray()
+            << false;
+    QTest::newRow("Object: invalid param 3")
+            << QJsonValue(QJsonObject { { "bit_count", 30 }, { "encoded_bits", 0 } })
             << QBitArray()
             << false;
 }
@@ -1780,7 +1816,71 @@ void TestDeserialization::testDeserializeQRegExp_data()
             { "syntax",         "RegExp2" }
         };
 
-        QTest::newRow("Object: invalid") << QJsonValue(input) << QRegExp() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        "[a-z0-9]+" },
+            { "syntax",         "RegExp2" }
+        };
+
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        "[a-z0-9]+" },
+            { "case_sensitive", false },
+        };
+
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        0 },
+            { "case_sensitive", false },
+            { "syntax",         "RegExp2" }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        "[a-z0-9]+" },
+            { "case_sensitive", "asd" },
+            { "syntax",         "RegExp2" }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        "[a-z0-9]+" },
+            { "case_sensitive", false },
+            { "syntax",         0 }
+        };
+
+        QTest::newRow("Object: invalid param 3") << QJsonValue(input) << QRegExp() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern",        "[a-z0-9]+" },
+            { "case_sensitive", false },
+            { "syntax",         "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 4") << QJsonValue(input) << QRegExp() << false;
     }
 }
 
@@ -1823,7 +1923,7 @@ void TestDeserialization::testDeserializeQRegularExpression_data()
         const QJsonObject input
         {
             { "pattern", "[a-z0-9]+" },
-            { "options", QJsonArray({ "DotMatchesEverything", "Multiline" }) }
+            { "options", QJsonArray { "DotMatchesEverything", "Multiline" } }
         };
 
         QTest::newRow("Object: with pattern")
@@ -1854,7 +1954,51 @@ void TestDeserialization::testDeserializeQRegularExpression_data()
             { "options", QJsonArray({ "DotMatchesEverything", "Multiline" }) }
         };
 
-        QTest::newRow("Object: invalid") << QJsonValue(input) << QRegularExpression() << false;
+        QTest::newRow("Object: missing param 1")
+                << QJsonValue(input) << QRegularExpression() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern", "[a-z0-9]+" }
+        };
+
+        QTest::newRow("Object: missing param 2")
+                << QJsonValue(input) << QRegularExpression() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern", 0 },
+            { "options", QJsonArray({ "DotMatchesEverything", "Multiline" }) }
+        };
+
+        QTest::newRow("Object: invalid param 1")
+                << QJsonValue(input) << QRegularExpression() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern", "[a-z0-9]+" },
+            { "options", 0 }
+        };
+
+        QTest::newRow("Object: invalid param 2")
+                << QJsonValue(input) << QRegularExpression() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "pattern", "[a-z0-9]+" },
+            { "options", QJsonArray({ "asd" }) }
+        };
+
+        QTest::newRow("Object: invalid param 3")
+                << QJsonValue(input) << QRegularExpression() << false;
     }
 }
 
@@ -1923,7 +2067,7 @@ void TestDeserialization::testDeserializeQSize_data()
             { "width",  123 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QSize() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QSize() << false;
     }
 
     {
@@ -1932,7 +2076,27 @@ void TestDeserialization::testDeserializeQSize_data()
             { "height", 456 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QSize() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QSize() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "width",  "asd" },
+            { "height", 456 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QSize() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "width",  123 },
+            { "height", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QSize() << false;
     }
 }
 
@@ -2002,7 +2166,7 @@ void TestDeserialization::testDeserializeQSizeF_data()
             { "width",  123.4 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QSizeF() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QSizeF() << false;
     }
 
     {
@@ -2011,7 +2175,27 @@ void TestDeserialization::testDeserializeQSizeF_data()
             { "height", 456.7 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QSizeF() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QSizeF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "width",  "asd" },
+            { "height", 456.7 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QSizeF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "width",  123.4 },
+            { "height", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QSizeF() << false;
     }
 }
 
@@ -2080,7 +2264,7 @@ void TestDeserialization::testDeserializeQPoint_data()
             { "x", 123 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QPoint() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QPoint() << false;
     }
 
     {
@@ -2089,7 +2273,27 @@ void TestDeserialization::testDeserializeQPoint_data()
             { "y", 456 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QPoint() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QPoint() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x", "asd" },
+            { "y", 456 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QPoint() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x", 123 },
+            { "y", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QPoint() << false;
     }
 }
 
@@ -2158,7 +2362,7 @@ void TestDeserialization::testDeserializeQPointF_data()
             { "x", 123.4 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QPointF() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QPointF() << false;
     }
 
     {
@@ -2167,7 +2371,27 @@ void TestDeserialization::testDeserializeQPointF_data()
             { "y", 567.8 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QPointF() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QPointF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x", "asd" },
+            { "y", 567.8 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QPointF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x", 123.4 },
+            { "y", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QPointF() << false;
     }
 }
 
@@ -2243,7 +2467,7 @@ void TestDeserialization::testDeserializeQLine_data()
             { "y2", 888 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QLine() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QLine() << false;
     }
 
     {
@@ -2254,7 +2478,7 @@ void TestDeserialization::testDeserializeQLine_data()
             { "y2", 888 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QLine() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QLine() << false;
     }
 
     {
@@ -2265,7 +2489,7 @@ void TestDeserialization::testDeserializeQLine_data()
             { "y2", 888 }
         };
 
-        QTest::newRow("Object: invalid 3") << QJsonValue(input) << QLine() << false;
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QLine() << false;
     }
 
     {
@@ -2276,7 +2500,55 @@ void TestDeserialization::testDeserializeQLine_data()
             { "x2", 777 }
         };
 
-        QTest::newRow("Object: invalid 4") << QJsonValue(input) << QLine() << false;
+        QTest::newRow("Object: missing param 4") << QJsonValue(input) << QLine() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", "asd" },
+            { "y1", 456 },
+            { "x2", 777 },
+            { "y2", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QLine() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 123 },
+            { "y1", "asd" },
+            { "x2", 777 },
+            { "y2", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QLine() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 123 },
+            { "y1", 456 },
+            { "x2", "asd" },
+            { "y2", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 3") << QJsonValue(input) << QLine() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 123 },
+            { "y1", 456 },
+            { "x2", 777 },
+            { "y2", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 4") << QJsonValue(input) << QLine() << false;
     }
 }
 
@@ -2352,7 +2624,7 @@ void TestDeserialization::testDeserializeQLineF_data()
             { "y2", 0.0 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QLineF() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QLineF() << false;
     }
 
     {
@@ -2363,7 +2635,7 @@ void TestDeserialization::testDeserializeQLineF_data()
             { "y2", 0.0 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QLineF() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QLineF() << false;
     }
 
     {
@@ -2374,7 +2646,7 @@ void TestDeserialization::testDeserializeQLineF_data()
             { "y2", 0.0 }
         };
 
-        QTest::newRow("Object: invalid 3") << QJsonValue(input) << QLineF() << false;
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QLineF() << false;
     }
 
     {
@@ -2385,7 +2657,55 @@ void TestDeserialization::testDeserializeQLineF_data()
             { "x2", 0.0 }
         };
 
-        QTest::newRow("Object: invalid 4") << QJsonValue(input) << QLineF() << false;
+        QTest::newRow("Object: missing param 4") << QJsonValue(input) << QLineF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", "asd" },
+            { "y1", 0.0 },
+            { "x2", 0.0 },
+            { "y2", 0.0 }
+        };
+
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QLineF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 0.0 },
+            { "y1", "asd" },
+            { "x2", 0.0 },
+            { "y2", 0.0 }
+        };
+
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QLineF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 0.0 },
+            { "y1", 0.0 },
+            { "x2", "asd" },
+            { "y2", 0.0 }
+        };
+
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QLineF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x1", 0.0 },
+            { "y1", 0.0 },
+            { "x2", 0.0 },
+            { "y2", "asd" }
+        };
+
+        QTest::newRow("Object: missing param 4") << QJsonValue(input) << QLineF() << false;
     }
 }
 
@@ -2461,7 +2781,7 @@ void TestDeserialization::testDeserializeQRect_data()
             { "height", 888 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QRect() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QRect() << false;
     }
 
     {
@@ -2472,7 +2792,7 @@ void TestDeserialization::testDeserializeQRect_data()
             { "height", 888 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QRect() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QRect() << false;
     }
 
     {
@@ -2483,7 +2803,7 @@ void TestDeserialization::testDeserializeQRect_data()
             { "height", 888 }
         };
 
-        QTest::newRow("Object: invalid 3") << QJsonValue(input) << QRect() << false;
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QRect() << false;
     }
 
     {
@@ -2494,7 +2814,55 @@ void TestDeserialization::testDeserializeQRect_data()
             { "width",  777 }
         };
 
-        QTest::newRow("Object: invalid 4") << QJsonValue(input) << QRect() << false;
+        QTest::newRow("Object: missing param 4") << QJsonValue(input) << QRect() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      "asd" },
+            { "y",      456 },
+            { "width",  777 },
+            { "height", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QRect() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123 },
+            { "y",      "asd" },
+            { "width",  777 },
+            { "height", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QRect() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123 },
+            { "y",      456 },
+            { "width",  "asd" },
+            { "height", 888 }
+        };
+
+        QTest::newRow("Object: invalid param 3") << QJsonValue(input) << QRect() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123 },
+            { "y",      456 },
+            { "width",  777 },
+            { "height", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 4") << QJsonValue(input) << QRect() << false;
     }
 }
 
@@ -2570,7 +2938,7 @@ void TestDeserialization::testDeserializeQRectF_data()
             { "height", 222.2 }
         };
 
-        QTest::newRow("Object: invalid 1") << QJsonValue(input) << QRectF() << false;
+        QTest::newRow("Object: missing param 1") << QJsonValue(input) << QRectF() << false;
     }
 
     {
@@ -2581,7 +2949,7 @@ void TestDeserialization::testDeserializeQRectF_data()
             { "height", 222.2 }
         };
 
-        QTest::newRow("Object: invalid 2") << QJsonValue(input) << QRectF() << false;
+        QTest::newRow("Object: missing param 2") << QJsonValue(input) << QRectF() << false;
     }
 
     {
@@ -2592,7 +2960,7 @@ void TestDeserialization::testDeserializeQRectF_data()
             { "height", 222.2 }
         };
 
-        QTest::newRow("Object: invalid 3") << QJsonValue(input) << QRectF() << false;
+        QTest::newRow("Object: missing param 3") << QJsonValue(input) << QRectF() << false;
     }
 
     {
@@ -2603,7 +2971,55 @@ void TestDeserialization::testDeserializeQRectF_data()
             { "width",  111.1 }
         };
 
-        QTest::newRow("Object: invalid 4") << QJsonValue(input) << QRectF() << false;
+        QTest::newRow("Object: missing param 4") << QJsonValue(input) << QRectF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      "asd" },
+            { "y",      567.8 },
+            { "width",  111.1 },
+            { "height", 222.2 }
+        };
+
+        QTest::newRow("Object: invalid param 1") << QJsonValue(input) << QRectF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123.4 },
+            { "y",      "asd" },
+            { "width",  111.1 },
+            { "height", 222.2 }
+        };
+
+        QTest::newRow("Object: invalid param 2") << QJsonValue(input) << QRectF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123.4 },
+            { "y",      567.8 },
+            { "width",  "asd" },
+            { "height", 222.2 }
+        };
+
+        QTest::newRow("Object: invalid param 3") << QJsonValue(input) << QRectF() << false;
+    }
+
+    {
+        const QJsonObject input
+        {
+            { "x",      123.4 },
+            { "y",      567.8 },
+            { "width",  111.1 },
+            { "height", "asd" }
+        };
+
+        QTest::newRow("Object: invalid param 4") << QJsonValue(input) << QRectF() << false;
     }
 }
 
@@ -2652,6 +3068,8 @@ void TestDeserialization::testDeserializeQStringList_data()
     QTest::newRow("String") << QJsonValue("asd") << QStringList() << false;
 
     QTest::newRow("Object") << QJsonValue(QJsonObject()) << QStringList() << false;
+
+    QTest::newRow("Array: invalid") << QJsonValue(QJsonArray {0}) << QStringList() << false;
 }
 
 // Test: deserialize<QJsonValue>() method ----------------------------------------------------------
@@ -3074,7 +3492,7 @@ void TestDeserialization::testDeserializeQPair_data()
         const QJsonObject value
         {
             { "first",  "asd" },
-            { "second", 123 },
+            { "second", 123 }
         };
         QTest::newRow("object: 1") << QJsonValue(value) << QPairStringInt("asd", 123) << true;
     }
@@ -3083,7 +3501,7 @@ void TestDeserialization::testDeserializeQPair_data()
         const QJsonObject value
         {
             { "first",  "abc" },
-            { "second", 456 },
+            { "second", 456 }
         };
         QTest::newRow("object: 2") << QJsonValue(value) << QPairStringInt("abc", 456) << true;
     }
@@ -3095,6 +3513,40 @@ void TestDeserialization::testDeserializeQPair_data()
     QTest::newRow("string")        << QJsonValue("abc123")      << QPairStringInt() << false;
     QTest::newRow("array")         << QJsonValue(QJsonArray())  << QPairStringInt() << false;
     QTest::newRow("object: empty") << QJsonValue(QJsonObject()) << QPairStringInt() << false;
+
+    {
+        const QJsonObject value
+        {
+            { "second", 456 }
+        };
+        QTest::newRow("object: missing param 1") << QJsonValue(value) << QPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  "abc" }
+        };
+        QTest::newRow("object: missing param 2") << QJsonValue(value) << QPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  0 },
+            { "second", 456 }
+        };
+        QTest::newRow("object: invalid param 1") << QJsonValue(value) << QPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  "abc" },
+            { "second", "abc" }
+        };
+        QTest::newRow("object: invalid param 2") << QJsonValue(value) << QPairStringInt() << false;
+    }
 }
 
 // Test: deserialize<std::pair>() method -----------------------------------------------------------
@@ -3149,6 +3601,44 @@ void TestDeserialization::testDeserializeStdPair_data()
     QTest::newRow("string")        << QJsonValue("abc123")      << StdPairStringInt() << false;
     QTest::newRow("array")         << QJsonValue(QJsonArray())  << StdPairStringInt() << false;
     QTest::newRow("object: empty") << QJsonValue(QJsonObject()) << StdPairStringInt() << false;
+
+    {
+        const QJsonObject value
+        {
+            { "second", 456 }
+        };
+        QTest::newRow("object: missing param 1")
+                << QJsonValue(value) << StdPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  "abc" }
+        };
+        QTest::newRow("object: missing param 2")
+                << QJsonValue(value) << StdPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  0 },
+            { "second", 456 }
+        };
+        QTest::newRow("object: invalid param 1")
+                << QJsonValue(value) << StdPairStringInt() << false;
+    }
+
+    {
+        const QJsonObject value
+        {
+            { "first",  "abc" },
+            { "second", "abc" }
+        };
+        QTest::newRow("object: invalid param 2")
+                << QJsonValue(value) << StdPairStringInt() << false;
+    }
 }
 
 // Test: deserialize<QList>() method ---------------------------------------------------------------
@@ -3190,6 +3680,8 @@ void TestDeserialization::testDeserializeQList_data()
     QTest::newRow("double") << QJsonValue(123.4)         << QList<int>() << false;
     QTest::newRow("string") << QJsonValue("abc123")      << QList<int>() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << QList<int>() << false;
+
+    QTest::newRow("array: invalid") << QJsonValue(QJsonArray {"asd"}) << QList<int>() << false;
 }
 
 // Test: deserialize<std::list>() method -----------------------------------------------------------
@@ -3231,6 +3723,8 @@ void TestDeserialization::testDeserializeStdList_data()
     QTest::newRow("double") << QJsonValue(123.4)         << std::list<int>() << false;
     QTest::newRow("string") << QJsonValue("abc123")      << std::list<int>() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << std::list<int>() << false;
+
+    QTest::newRow("array: invalid") << QJsonValue(QJsonArray {"asd"}) << std::list<int>() << false;
 }
 
 // Test: deserialize<QVector>() method -------------------------------------------------------------
@@ -3272,6 +3766,8 @@ void TestDeserialization::testDeserializeQVector_data()
     QTest::newRow("double") << QJsonValue(123.4)         << QVector<int>() << false;
     QTest::newRow("string") << QJsonValue("abc123")      << QVector<int>() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << QVector<int>() << false;
+
+    QTest::newRow("array: invalid") << QJsonValue(QJsonArray {"asd"}) << QVector<int>() << false;
 }
 
 // Test: deserialize<std::vector>() method ---------------------------------------------------------
@@ -3313,6 +3809,9 @@ void TestDeserialization::testDeserializeStdVector_data()
     QTest::newRow("double") << QJsonValue(123.4)         << std::vector<int>() << false;
     QTest::newRow("string") << QJsonValue("abc123")      << std::vector<int>() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << std::vector<int>() << false;
+
+    QTest::newRow("array: invalid")
+            << QJsonValue(QJsonArray {"asd"}) << std::vector<int>() << false;
 }
 
 // Test: deserialize<QSet>() method ----------------------------------------------------------------
@@ -3354,6 +3853,9 @@ void TestDeserialization::testDeserializeQSet_data()
     QTest::newRow("double") << QJsonValue(123.4)         << QSet<int>() << false;
     QTest::newRow("string") << QJsonValue("abc123")      << QSet<int>() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << QSet<int>() << false;
+
+    QTest::newRow("array: invalid 1") << QJsonValue(QJsonArray {"asd"})  << QSet<int>() << false;
+    QTest::newRow("array: invalid 2") << QJsonValue(QJsonArray { 1, 1 }) << QSet<int>() << false;
 }
 
 // Test: deserialize<QMap>() method ----------------------------------------------------------------
@@ -3407,6 +3909,12 @@ void TestDeserialization::testDeserializeQMap_data()
     QTest::newRow("double") << QJsonValue(123.4)        << QMapIntString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << QMapIntString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << QMapIntString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << QMapIntString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"0", 0}}) << QMapIntString() << false;
 }
 
 // Test: deserialize<std::map>() method ------------------------------------------------------------
@@ -3460,6 +3968,12 @@ void TestDeserialization::testDeserializeStdMap_data()
     QTest::newRow("double") << QJsonValue(123.4)        << StdMapIntString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << StdMapIntString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << StdMapIntString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << StdMapIntString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"0", 0}}) << StdMapIntString() << false;
 }
 
 // Test: deserialize<QHash>() method ---------------------------------------------------------------
@@ -3513,9 +4027,15 @@ void TestDeserialization::testDeserializeQHash_data()
     QTest::newRow("double") << QJsonValue(123.4)        << QHashQDateString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << QHashQDateString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << QHashQDateString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << QHashQDateString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"2020-01-03", 0}}) << QHashQDateString() << false;
 }
 
-// Test: deserialize<std::unordered_map>() method ---------------------------------------------------------------
+// Test: deserialize<std::unordered_map>() method --------------------------------------------------
 
 using StdUnorderedMapIntString = std::unordered_map<int, QString>;
 Q_DECLARE_METATYPE(StdUnorderedMapIntString)
@@ -3543,7 +4063,8 @@ void TestDeserialization::testDeserializeStdUnorderedMap_data()
     QTest::addColumn<bool>("expectedResult");
 
     // Positive tests
-    QTest::newRow("object: empty") << QJsonValue(QJsonObject()) << StdUnorderedMapIntString() << true;
+    QTest::newRow("object: empty")
+            << QJsonValue(QJsonObject()) << StdUnorderedMapIntString() << true;
 
     {
         const StdUnorderedMapIntString expectedOutput
@@ -3567,6 +4088,12 @@ void TestDeserialization::testDeserializeStdUnorderedMap_data()
     QTest::newRow("double") << QJsonValue(123.4)        << StdUnorderedMapIntString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << StdUnorderedMapIntString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << StdUnorderedMapIntString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << StdUnorderedMapIntString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"0", 0}}) << StdUnorderedMapIntString() << false;
 }
 
 // Test: deserialize<QMultiMap>() method -----------------------------------------------------------
@@ -3627,6 +4154,12 @@ void TestDeserialization::testDeserializeQMultiMap_data()
     QTest::newRow("double") << QJsonValue(123.4)        << QMultiMapIntString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << QMultiMapIntString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << QMultiMapIntString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << QMultiMapIntString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"0", 0}}) << QMultiMapIntString() << false;
 }
 
 // Test: deserialize<QMultiHash>() method ----------------------------------------------------------
@@ -3687,6 +4220,12 @@ void TestDeserialization::testDeserializeQMultiHash_data()
     QTest::newRow("double") << QJsonValue(123.4)        << QMultiHashIntString() << false;
     QTest::newRow("string") << QJsonValue("abc123")     << QMultiHashIntString() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << QMultiHashIntString() << false;
+
+    QTest::newRow("object: invalid key")
+            << QJsonValue(QJsonObject {{"asd", "asd"}}) << QMultiHashIntString() << false;
+
+    QTest::newRow("object: invalid value")
+            << QJsonValue(QJsonObject {{"0", 0}}) << QMultiHashIntString() << false;
 }
 
 // Test: deserializeNode(index) method -------------------------------------------------------------

@@ -60,71 +60,20 @@ namespace Internal
 {
 
 template<typename T>
-using IsMax64BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 8), bool>;
+using IsMax32BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 4), bool>;
 
 template<typename T>
-using IsMax64BitFloatingPoint = std::enable_if_t<
-std::is_floating_point<T>::value && (sizeof(T) <= 8),
-bool
->;
+using Is64BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 8), bool>;
 
 // -------------------------------------------------------------------------------------------------
 
-template<typename T_OUT, IsMax64BitInteger<T_OUT> = true>
+template<typename T_OUT, IsMax32BitInteger<T_OUT> = true>
 bool convertIntegerValue(const qint64 inputValue, T_OUT *outputValue)
 {
-    constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::min();
-    constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
+    constexpr auto lowwerLimit = static_cast<qint64>(std::numeric_limits<T_OUT>::lowest());
+    constexpr auto upperLimit = static_cast<qint64>(std::numeric_limits<T_OUT>::max());
 
-    // Check if output value is also signed
-    if (std::is_signed<T_OUT>::value)
-    {
-        // Output value is also signed, just check the valid range
-        if ((inputValue < static_cast<qint64>(lowwerLimit)) ||
-            (inputValue > static_cast<qint64>(upperLimit)))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                    << QString("Value [%1] is out of range for the its data type "
-                               "(min: [%2], max: [%3])!")
-                       .arg(inputValue)
-                       .arg(lowwerLimit)
-                       .arg(upperLimit);
-            return false;
-        }
-    }
-    else
-    {
-        // Output is unsigned
-
-        // A negative value cannot be stored in the output or a positive value greater than the
-        // max value that can be stored in the output
-        if ((inputValue < 0LL) ||
-            (static_cast<quint64>(inputValue) > static_cast<quint64>(upperLimit)))
-        {
-            qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                    << QString("Value [%1] is out of range for the its data type "
-                               "(min: [%2], max: [%3])!")
-                       .arg(inputValue)
-                       .arg(lowwerLimit)
-                       .arg(upperLimit);
-            return false;
-        }
-    }
-
-    *outputValue = static_cast<T_OUT>(inputValue);
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------
-
-template<typename T_OUT, IsMax64BitInteger<T_OUT> = true>
-bool convertIntegerValue(const quint64 inputValue, T_OUT *outputValue)
-{
-    constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::min();
-    constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
-
-    // Make sure that the input value can be stored in the output
-    if (inputValue > static_cast<quint64>(upperLimit))
+    if ((inputValue < lowwerLimit) || (inputValue > upperLimit))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QString("Value [%1] is out of range for the its data type "
@@ -141,10 +90,64 @@ bool convertIntegerValue(const quint64 inputValue, T_OUT *outputValue)
 
 // -------------------------------------------------------------------------------------------------
 
+template<typename T_OUT, Is64BitInteger<T_OUT> = true>
+bool convertIntegerValue(const qint64 inputValue, T_OUT *outputValue)
+{
+    constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::lowest();
+    constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
+
+    // Check if output value is unsigned
+    if (std::is_unsigned<T_OUT>::value)
+    {
+        if (inputValue < 0LL)
+        {
+            qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                    << QString("Value [%1] is out of range for the its data type "
+                               "(min: [%2], max: [%3])!")
+                       .arg(inputValue)
+                       .arg(lowwerLimit)
+                       .arg(upperLimit);
+            return false;
+        }
+    }
+
+    *outputValue = static_cast<T_OUT>(inputValue);
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T_OUT, Is64BitInteger<T_OUT> = true>
+bool convertIntegerValue(const quint64 inputValue, T_OUT *outputValue)
+{
+    constexpr auto lowwerLimit = std::numeric_limits<T_OUT>::lowest();
+    constexpr auto upperLimit = std::numeric_limits<T_OUT>::max();
+
+    // Check if output value is signed
+    if (std::is_signed<T_OUT>::value)
+    {
+        if (inputValue > static_cast<quint64>(upperLimit))
+        {
+            qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                    << QString("Value [%1] is out of range for the its data type "
+                               "(min: [%2], max: [%3])!")
+                       .arg(inputValue)
+                       .arg(lowwerLimit)
+                       .arg(upperLimit);
+            return false;
+        }
+    }
+
+    *outputValue = static_cast<T_OUT>(inputValue);
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------
+
 template<typename T_OUT>
 bool convertIntegerValue(const double inputValue, T_OUT *outputValue)
 {
-    constexpr auto lowwerLimit = static_cast<double>(std::numeric_limits<T_OUT>::min());
+    constexpr auto lowwerLimit = static_cast<double>(std::numeric_limits<T_OUT>::lowest());
     constexpr auto upperLimit  = static_cast<double>(std::numeric_limits<T_OUT>::max());
 
     // Make sure that the input value can be stored in the output
@@ -166,7 +169,39 @@ bool convertIntegerValue(const double inputValue, T_OUT *outputValue)
 
 // -------------------------------------------------------------------------------------------------
 
-template<typename T_OUT>
+template<typename T_OUT, IsMax32BitInteger<T_OUT> = true>
+bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
+{
+    // Through a signed integer
+    {
+        bool ok = false;
+        const qint64 integerValue = inputValue.toLongLong(&ok);
+
+        if (ok)
+        {
+            return convertIntegerValue(integerValue, outputValue);
+        }
+    }
+
+    // Through a floating-point
+    {
+        bool ok = false;
+        const double doubleValue = inputValue.toDouble(&ok);
+
+        if (ok)
+        {
+            return convertIntegerValue(doubleValue, outputValue);
+        }
+    }
+
+    qCWarning(CedarFramework::LoggingCategory::Deserialization)
+            << QString("Value [%1] is not a valid integer!").arg(inputValue);
+    return false;
+}
+
+// -------------------------------------------------------------------------------------------------
+
+template<typename T_OUT, Is64BitInteger<T_OUT> = true>
 bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
 {
     // Through a signed integer
