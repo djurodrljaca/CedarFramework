@@ -58,6 +58,10 @@ add_library(CedarFramework SHARED
         src/Serialization.cpp
     )
 
+set_target_properties(CedarFramework PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+
 include(GenerateExportHeader)
 generate_export_header(CedarFramework
     EXPORT_FILE_NAME exports/CedarFramework/CedarFrameworkExport.hpp)
