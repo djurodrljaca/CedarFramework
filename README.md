@@ -12,7 +12,25 @@ This library provides the following features:
 * C++14 compliant compiler
 * Qt5 framework (only Core and Test modules)
 
-## Querying nodes
+## Usage
+
+### CMake Integration
+
+To use this module in a CMake project you need to build and deploy it. Then just add it as a package to your project's CMakeLists.txt:
+
+```
+find_package(CedarFramework REQUIRED)
+```
+
+And link it to your target:
+
+```
+target_link_libraries(target_name PUBLIC
+        CedarFramework::CedarFramework
+    )
+```
+
+### Querying nodes
 
 The *CedarFramework::hasNode()* function checks if a JSON data structure contains a sub-node:
 
@@ -28,15 +46,15 @@ The *CedarFramework::getNode()* function extracts a sub-node from a JSON data st
 
 **Note: The *query module* only works with *JSON Array* or *JSON Object* as the root node.**
 
-## Serialization
+### Serialization
 
 The *CedarFramework::serialize()* function serializes a native value to an equivalent *JSON value* and *CedarFramework::deserialize()* function deserializes a *JSON value* to a native value.
 
-## Deserialization
+### Deserialization
 
 The *CedarFramework::deserializeNode()* and *CedarFramework::deserializeOptionalNode()* convenience functions can be used to deserialize either a mandatory or optional sub-node of a JSON data structure directly instead of first extracting the sub-node and then deserializing it.
 
-## Supported types
+### Supported types
 
 The following table shows how the supported native types are serialized to JSON:
 
@@ -79,6 +97,6 @@ The following table shows how the supported native types are serialized to JSON:
 
 **Note: in maps the key must be of a native type that is serializable to either *JSON String* or *JSON Number*!**
 
-## Custom types
+### Custom types
 
 The user can create serialization and deserialization functions for native types not supported by the library by creating the specialized *CedarFramework::serialize()* and *CedarFramework::deserialize()* functions.
