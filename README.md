@@ -6,11 +6,29 @@ This library provides the following features:
 * serialization of data structure to JSON
 * deserialization of data structures from JSON
 
-## Build requirements
+
+## Build and deployment
+
+For building the following requirements are needed:
 
 * CMake v3.5 or later
 * C++14 compliant compiler
 * Qt5 framework (only Core and Test modules)
+
+If the library needs to be deployed to a custom location you need to set the ```CMAKE_INSTALL_PREFIX``` variable or if you need to use a custom Qt installation you need to set the ```CMAKE_PREFIX_PATH``` variable.
+
+Example:
+
+```
+$ cmake -DCMAKE_INSTALL_PREFIX=path/to/install/dir -DCMAKE_PREFIX_PATH=path/to/qt/dir path/to/source/dir
+```
+
+Then build and deploy the library:
+
+```
+$ cmake --build . --target install
+```
+
 
 ## Usage
 
@@ -25,10 +43,9 @@ find_package(CedarFramework REQUIRED)
 And link it to your target:
 
 ```
-target_link_libraries(target_name PUBLIC
-        CedarFramework::CedarFramework
-    )
+target_link_libraries(target_name PUBLIC CedarFramework::CedarFramework)
 ```
+
 
 ### Querying nodes
 
@@ -46,13 +63,16 @@ The *CedarFramework::getNode()* function extracts a sub-node from a JSON data st
 
 **Note: The *query module* only works with *JSON Array* or *JSON Object* as the root node.**
 
+
 ### Serialization
 
 The *CedarFramework::serialize()* function serializes a native value to an equivalent *JSON value* and *CedarFramework::deserialize()* function deserializes a *JSON value* to a native value.
 
+
 ### Deserialization
 
 The *CedarFramework::deserializeNode()* and *CedarFramework::deserializeOptionalNode()* convenience functions can be used to deserialize either a mandatory or optional sub-node of a JSON data structure directly instead of first extracting the sub-node and then deserializing it.
+
 
 ### Supported types
 
@@ -96,6 +116,7 @@ The following table shows how the supported native types are serialized to JSON:
 **Note: a *JSON Value* can be deserialized to a QVariant value only as a direct conversion of QJsonValue to QVariant because the exact native type of the originally serialized value is not available!**
 
 **Note: in maps the key must be of a native type that is serializable to either *JSON String* or *JSON Number*!**
+
 
 ### Custom types
 
