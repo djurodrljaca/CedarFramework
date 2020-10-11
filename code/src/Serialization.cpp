@@ -72,7 +72,7 @@ using Is64BitInteger = std::enable_if_t<std::is_integral<T>::value && (sizeof(T)
 template<typename T, IsMax32BitInteger<T> = true>
 QJsonValue convertIntegerValue(const T &value)
 {
-    return value;
+    return static_cast<qint64>(value);
 }
 
 // -------------------------------------------------------------------------------------------------

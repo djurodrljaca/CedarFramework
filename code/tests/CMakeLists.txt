@@ -51,7 +51,7 @@ function(CedarFramework_AddTest)
         )
 
     target_link_libraries(${PARAM_TEST_NAME}
-            PUBLIC CedarFramework
+            PUBLIC CedarFramework::CedarFramework
             PUBLIC Qt5::Test
             PUBLIC ${PARAM_ADDITIONAL_LIBS}
         )

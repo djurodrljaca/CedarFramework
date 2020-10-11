@@ -45,7 +45,7 @@ namespace CedarFramework
  * \retval  true    Node was found
  * \retval  false   Node was not
  */
-bool hasNode(const QJsonValue &data, const int index);
+CEDARFRAMEWORK_EXPORT bool hasNode(const QJsonValue &data, const int index);
 
 /*!
  * Checks if the data contains a sub-node with the specified name
@@ -56,7 +56,7 @@ bool hasNode(const QJsonValue &data, const int index);
  * \retval  true    Node was found
  * \retval  false   Node was not
  */
-bool hasNode(const QJsonValue &data, const QString &name);
+CEDARFRAMEWORK_EXPORT bool hasNode(const QJsonValue &data, const QString &name);
 
 /*!
  * Checks if the data contains a sub-node at the specified path
@@ -67,7 +67,7 @@ bool hasNode(const QJsonValue &data, const QString &name);
  * \retval  true    Node was found
  * \retval  false   Node was not
  */
-bool hasNode(const QJsonValue &data, const QVariantList &nodePath);
+CEDARFRAMEWORK_EXPORT bool hasNode(const QJsonValue &data, const QVariantList &nodePath);
 
 /*!
  * Checks if the data contains a sub-node at the specified path
@@ -78,7 +78,7 @@ bool hasNode(const QJsonValue &data, const QVariantList &nodePath);
  * \retval  true    Node was found
  * \retval  false   Node was not
  */
-bool hasNode(const QJsonValue &data, const QStringList &nodePath);
+CEDARFRAMEWORK_EXPORT bool hasNode(const QJsonValue &data, const QStringList &nodePath);
 
 /*!
  * Gets the sub-node at the specified index
@@ -88,7 +88,7 @@ bool hasNode(const QJsonValue &data, const QStringList &nodePath);
  *
  * \return  Node at the specified index or an Undefined value if the node was not found
  */
-QJsonValue getNode(const QJsonValue &data, const int index);
+CEDARFRAMEWORK_EXPORT QJsonValue getNode(const QJsonValue &data, const int index);
 
 /*!
  * Gets the sub-node with the specified name
@@ -98,7 +98,7 @@ QJsonValue getNode(const QJsonValue &data, const int index);
  *
  * \return  Node with the specified name or an Undefined value if the node was not found
  */
-QJsonValue getNode(const QJsonValue &data, const QString &name);
+CEDARFRAMEWORK_EXPORT QJsonValue getNode(const QJsonValue &data, const QString &name);
 
 /*!
  * Gets the sub-node at the specified path
@@ -108,7 +108,7 @@ QJsonValue getNode(const QJsonValue &data, const QString &name);
  *
  * \return  Node at the specified path or an Undefined value if the node was not found
  */
-QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath);
+CEDARFRAMEWORK_EXPORT QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath);
 
 /*!
  * Gets the sub-node at the specified path
@@ -118,6 +118,6 @@ QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath);
  *
  * \return  Node at the specified path or an Undefined value if the node was not found
  */
-QJsonValue getNode(const QJsonValue &data, const QStringList &nodePath);
+CEDARFRAMEWORK_EXPORT QJsonValue getNode(const QJsonValue &data, const QStringList &nodePath);
 
 } // namespace CedarFramework
