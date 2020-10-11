@@ -25,8 +25,10 @@
 
 // Qt includes
 #include <QtCore/QBitArray>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 #include <QtCore/QCborArray>
 #include <QtCore/QCborMap>
+#endif
 #include <QtCore/QDateTime>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLine>
@@ -35,6 +37,7 @@
 #include <QtCore/QPointF>
 #include <QtCore/QRect>
 #include <QtCore/QRectF>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QSize>
 #include <QtCore/QSizeF>
 #include <QtCore/QUrl>
@@ -562,7 +565,7 @@ bool deserialize(const QJsonValue &json, QChar *value)
         return false;
     }
 
-    *value = stringValue.front();
+    *value = stringValue.at(0);
     return true;
 }
 
@@ -606,7 +609,11 @@ bool deserialize(const QJsonValue &json, QByteArray *value)
         return true;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     *value = QByteArray::fromBase64(encodedData, QByteArray::AbortOnBase64DecodingErrors);
+#else
+    *value = QByteArray::fromBase64(encodedData);
+#endif
 
     if (value->isEmpty())
     {
@@ -625,68 +632,59 @@ bool deserialize(const QJsonValue &json, QBitArray *value)
 {
     Q_ASSERT(value != nullptr);
 
-    // Get the JSON Object representation
-    if (!json.isObject())
+    // Get the JSON Array representation
+    if (!json.isArray())
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
                 << QStringLiteral("JSON value is not a valid bit array:") << json;
         return false;
     }
 
-    const auto jsonObject = json.toObject();
+    const auto jsonArray = json.toArray();
 
-    if (jsonObject.size() != 2)
+    // Deserialize bits
+    QVector<int> bits;
+
+    if (!deserialize(jsonArray, &bits))
     {
         qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QString("A bit array needs to have exactly 2 members but this one has %1! JSON "
-                           "value:").arg(jsonObject.size())
-                << jsonObject;
+                << QStringLiteral("JSON value is not a valid bit array:") << json;
         return false;
     }
 
-    // Deserialize members
-    int bitCount = 0;
+    // Iterate over the bits and set them at the appropriate location in the bit array
+    QBitArray bitArray(bits.size(), false);
 
-    if (!deserialize(jsonObject.value(QStringLiteral("bit_count")), &bitCount))
+    for (int i = 0; i < bits.size(); i++)
     {
-        qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'bit_count' of a bit array:")
-                << jsonObject;
-        return false;
+        const int bit = bits.at(i);
+
+        switch (bit)
+        {
+            case 1:
+            {
+                // Set bit
+                bitArray.setBit(i);
+                break;
+            }
+
+            case 0:
+            {
+                // All bits are initialized to 0
+                break;
+            }
+
+            default:
+            {
+                qCWarning(CedarFramework::LoggingCategory::Deserialization)
+                        << QStringLiteral("JSON value is not a valid bit array:") << json;
+                return false;
+            }
+        }
     }
 
-    QByteArray encodedBits;
-
-    if (!deserialize(jsonObject.value(QStringLiteral("encoded_bits")), &encodedBits))
-    {
-        qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QStringLiteral("Failed to deserialize the member 'encoded_bits' of a bit array:")
-                << jsonObject;
-        return false;
-    }
-
-    // Check if the bit count matches the size of the encoded bits
-    int byteCount = bitCount / 8;
-
-    if ((bitCount % 8) > 0)
-    {
-        byteCount++;
-    }
-
-    if (encodedBits.size() != byteCount)
-    {
-        qCWarning(CedarFramework::LoggingCategory::Deserialization)
-                << QString("The 'bit_count' [%1] doesn't correspond to the size of 'encoded_bits' "
-                           "[%2] of a bit array. Expected size was [%3]! JSON value:")
-                   .arg(bitCount)
-                   .arg(encodedBits.size())
-                   .arg(byteCount)
-                << jsonObject;
-        return false;
-    }
-
-    // Recreate the bit array
-    *value = QBitArray::fromBits(encodedBits.constData(), bitCount);
+    // Apply the value to the output
+    *value = bitArray;
     return true;
 }
 
@@ -919,7 +917,7 @@ bool deserialize(const QJsonValue &json, QUuid *value)
 
     const QString stringValue = json.toString();
 
-    *value = QUuid::fromString(stringValue);
+    *value = QUuid(stringValue);
 
     if (value->isNull() &&
         (stringValue != QStringLiteral("{00000000-0000-0000-0000-000000000000}")))
@@ -1741,6 +1739,7 @@ bool deserialize(const QJsonValue &json, QJsonDocument *value)
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 bool deserialize(const QJsonValue &json, QCborValue *value)
 {
@@ -1749,9 +1748,11 @@ bool deserialize(const QJsonValue &json, QCborValue *value)
     *value = QCborValue::fromJsonValue(json);
     return true;
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 bool deserialize(const QJsonValue &json, QCborArray *value)
 {
@@ -1768,9 +1769,11 @@ bool deserialize(const QJsonValue &json, QCborArray *value)
     *value = QCborArray::fromJsonArray(json.toArray());
     return true;
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 bool deserialize(const QJsonValue &json, QCborMap *value)
 {
@@ -1787,9 +1790,11 @@ bool deserialize(const QJsonValue &json, QCborMap *value)
     *value = QCborMap::fromJsonObject(json.toObject());
     return true;
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 bool deserialize(const QJsonValue &json, QCborSimpleType *value)
 {
@@ -1819,5 +1824,6 @@ bool deserialize(const QJsonValue &json, QCborSimpleType *value)
             << json;
     return false;
 }
+#endif
 
 } // namespace CedarFramework

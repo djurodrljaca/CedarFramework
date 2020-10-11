@@ -228,21 +228,29 @@ CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonObject *valu
 template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QJsonDocument *value);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborValue *value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborArray *value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborMap *value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT bool deserialize(const QJsonValue &json, QCborSimpleType *value);
+#endif
 
 //! \copydoc    CedarFramework::serialize()
 template<typename T1, typename T2>

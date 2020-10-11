@@ -25,8 +25,10 @@
 
 // Qt includes
 #include <QtCore/QBitArray>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 #include <QtCore/QCborArray>
 #include <QtCore/QCborMap>
+#endif
 #include <QtCore/QDateTime>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLine>
@@ -35,6 +37,7 @@
 #include <QtCore/QPointF>
 #include <QtCore/QRect>
 #include <QtCore/QRectF>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QSize>
 #include <QtCore/QSizeF>
 #include <QtCore/QUrl>
@@ -246,18 +249,21 @@ QJsonValue serialize(const QByteArray &value)
 template<>
 QJsonValue serialize(const QBitArray &value)
 {
-    const int bitCount = value.size();
-    int byteCount = bitCount / 8;
+    QJsonArray bits;
 
-    if ((bitCount % 8) > 0)
+    for (int i = 0; i < value.size(); i++)
     {
-        byteCount++;
+        if (value.testBit(i))
+        {
+            bits.append(1);
+        }
+        else
+        {
+            bits.append(0);
+        }
     }
 
-    return QJsonObject {
-        { QStringLiteral("bit_count"), QJsonValue(bitCount) },
-        { QStringLiteral("encoded_bits"), serialize(QByteArray(value.bits(), byteCount)) }
-    };
+    return bits;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -544,25 +550,33 @@ QJsonValue serialize(const QVariant &value)
             return serialize(value.value<QJsonDocument>());
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         case QMetaType::QCborValue:
         {
             return serialize(value.value<QCborValue>());
         }
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         case QMetaType::QCborArray:
         {
             return serialize(value.value<QCborArray>());
         }
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         case QMetaType::QCborMap:
         {
             return serialize(value.value<QCborMap>());
         }
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         case QMetaType::QCborSimpleType:
         {
             return serialize(value.value<QCborSimpleType>());
         }
+#endif
 
         // Note: QVariant cannot be wrapped in another QVariant!
         case QMetaType::QVariant:
@@ -882,30 +896,37 @@ QJsonValue serialize(const QJsonDocument &value)
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 QJsonValue serialize(const QCborValue &value)
 {
     return value.toJsonValue();
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 QJsonValue serialize(const QCborArray &value)
 {
     return value.toJsonArray();
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 QJsonValue serialize(const QCborMap &value)
 {
     return value.toJsonObject();
 }
+#endif
 
 // -------------------------------------------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 template<>
 QJsonValue serialize(const QCborSimpleType &value)
 {
@@ -933,5 +954,6 @@ QJsonValue serialize(const QCborSimpleType &value)
         }
     }
 }
+#endif
 
 } // namespace CedarFramework

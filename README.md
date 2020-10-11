@@ -86,7 +86,7 @@ The following table shows how the supported native types are serialized to JSON:
 | *strings*                 | All string types are stored a *JSON String*
 | QChar                     | *JSON String*
 | QByteArray                | Base64 encoded *JSON String*
-| QBitArray                 | *JSON Object* with:<br><ul><li>"bit_count" (*JSON Number*)</li><li>"encoded_bits" (Base64 encoded *JSON String*)</li></ul>
+| QBitArray                 | *JSON Array* each bit encoded as 0 or 1 with the bit index matching the array index
 | QDate                     | *JSON String* in ISO 8601 format (yyyy-MM-dd)
 | QTime                     | *JSON String* in ISO 8601 format with millisecond precision (HH:mm:ss.sss)
 | QDateTime                 | *JSON String* in ISO 8601 format with millisecond precision (yyyy-MM-ddTHH:mm:ss.sssTZ) where *TZ* is:<br><ul><li>empty for local time</li><li>"Z" for UTC time</li><li>"[+\|-]HH:mm" for offset from UTC</li></ul>

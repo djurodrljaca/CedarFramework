@@ -22,6 +22,7 @@
 #include <CedarFramework/Query.hpp>
 
 // Qt includes
+#include <QtCore/QBitArray>
 #include <QtCore/QDebug>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>

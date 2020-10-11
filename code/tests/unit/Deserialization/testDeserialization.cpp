@@ -22,12 +22,16 @@
 #include <CedarFramework/Deserialization.hpp>
 
 // Qt includes
+#include <QtCore/QBitArray>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 #include <QtCore/QCborArray>
 #include <QtCore/QCborMap>
 #include <QtCore/QCborValue>
+#endif
 #include <QtCore/QDebug>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLine>
+#include <QtCore/QRegularExpression>
 #include <QtTest/QTest>
 
 // System includes
@@ -448,17 +452,25 @@ private slots:
     void testDeserializeQJsonDocument();
     void testDeserializeQJsonDocument_data();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testDeserializeQCborValue();
     void testDeserializeQCborValue_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testDeserializeQCborArray();
     void testDeserializeQCborArray_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testDeserializeQCborMap();
     void testDeserializeQCborMap_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testDeserializeQCborSimpleType();
     void testDeserializeQCborSimpleType_data();
+#endif
 
     void testDeserializeQPair();
     void testDeserializeQPair_data();
@@ -1130,7 +1142,9 @@ void TestDeserialization::testDeserializeQByteArray_data()
 
     QTest::newRow("Double: 1.0") << QJsonValue(1.0) << QByteArray() << false;
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     QTest::newRow("String: invalid") << QJsonValue("xyz&!") << QByteArray() << false;
+#endif
 
     QTest::newRow("Array") << QJsonValue(QJsonArray()) << QByteArray() << false;
     QTest::newRow("Object") << QJsonValue(QJsonObject()) << QByteArray() << false;
@@ -1162,43 +1176,39 @@ void TestDeserialization::testDeserializeQBitArray_data()
 
     // Positive tests
     {
-        const QJsonObject input
-        {
-            { "bit_count",    0 },
-            { "encoded_bits", "" }
-        };
-        QTest::newRow("Object: default") << QJsonValue(input) << QBitArray() << true;
+        const QJsonArray input;
+        QTest::newRow("Array: empty") << QJsonValue(input) << QBitArray() << true;
     }
 
     {
-        const QJsonObject input
+        const QJsonArray input
         {
-            { "bit_count",    30 },
-            { "encoded_bits", "MEEAAA==" }
+            1, 1, 1, 1, 0, 0, 0, 0,
+            "0", "0", "1", "1", 1.0, 1.0f, 0.0, 0.0f
         };
 
-        QBitArray expectedResult(30);
-        expectedResult.clearBit(0);
-        expectedResult.clearBit(1);
-        expectedResult.clearBit(2);
-        expectedResult.clearBit(3);
+        QBitArray expectedResult(16);
+        expectedResult.setBit(0);
+        expectedResult.setBit(1);
+        expectedResult.setBit(2);
+        expectedResult.setBit(3);
 
-        expectedResult.setBit(4);
-        expectedResult.setBit(5);
+        expectedResult.clearBit(4);
+        expectedResult.clearBit(5);
         expectedResult.clearBit(6);
         expectedResult.clearBit(7);
 
-        expectedResult.setBit(8);
+        expectedResult.clearBit(8);
         expectedResult.clearBit(9);
-        expectedResult.clearBit(10);
-        expectedResult.clearBit(11);
+        expectedResult.setBit(10);
+        expectedResult.setBit(11);
 
-        expectedResult.clearBit(12);
-        expectedResult.clearBit(13);
-        expectedResult.setBit(14);
+        expectedResult.setBit(12);
+        expectedResult.setBit(13);
+        expectedResult.clearBit(14);
         expectedResult.clearBit(15);
 
-        QTest::newRow("Object: valid") << QJsonValue(input) << expectedResult << true;
+        QTest::newRow("Array: valid") << QJsonValue(input) << expectedResult << true;
     }
 
     // Negative tests
@@ -1211,25 +1221,22 @@ void TestDeserialization::testDeserializeQBitArray_data()
 
     QTest::newRow("String: invalid") << QJsonValue("123") << QBitArray() << false;
 
-    QTest::newRow("Array") << QJsonValue(QJsonArray()) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 1") << QJsonValue(QJsonArray({ 2 })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 2") << QJsonValue(QJsonArray({ -1 })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 3")
+            << QJsonValue(QJsonArray({ 1.5 })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 4")
+            << QJsonValue(QJsonArray({ -0.5 })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 5")
+            << QJsonValue(QJsonArray({ false })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 6")
+            << QJsonValue(QJsonArray({ true })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 7")
+            << QJsonValue(QJsonArray({ "-1" })) << QBitArray() << false;
+    QTest::newRow("Array: invalid bit 8")
+            << QJsonValue(QJsonArray({ "2" })) << QBitArray() << false;
 
-    QTest::newRow("Object: empty") << QJsonValue(QJsonObject()) << QBitArray() << false;
-    QTest::newRow("Object: missing param 1")
-            << QJsonValue(QJsonObject {{ "bit_count", 30 }}) << QBitArray() << false;
-    QTest::newRow("Object: missing param 2")
-            << QJsonValue(QJsonObject {{ "encoded_bits", "MEEAAA==" }}) << QBitArray() << false;
-    QTest::newRow("Object: invalid param 1")
-            << QJsonValue(QJsonObject { { "bit_count", 10 }, { "encoded_bits", "MEEAAA==" } })
-            << QBitArray()
-            << false;
-    QTest::newRow("Object: invalid param 2")
-            << QJsonValue(QJsonObject { { "bit_count", "" }, { "encoded_bits", "MEEAAA==" } })
-            << QBitArray()
-            << false;
-    QTest::newRow("Object: invalid param 3")
-            << QJsonValue(QJsonObject { { "bit_count", 30 }, { "encoded_bits", 0 } })
-            << QBitArray()
-            << false;
+    QTest::newRow("Object") << QJsonValue(QJsonObject()) << QBitArray() << false;
 }
 
 // Test: deserialize<std::string>() method ---------------------------------------------------------
@@ -3252,6 +3259,7 @@ void TestDeserialization::testDeserializeQJsonDocument_data()
 
 // Test: deserialize<QCborValue>() method ----------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestDeserialization::testDeserializeQCborValue()
 {
     QFETCH(QJsonValue, input);
@@ -3317,9 +3325,11 @@ void TestDeserialization::testDeserializeQCborValue_data()
 
     // Negative tests
 }
+#endif
 
 // Test: deserialize<QCborArray>() method ----------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestDeserialization::testDeserializeQCborArray()
 {
     QFETCH(QJsonValue, input);
@@ -3360,9 +3370,11 @@ void TestDeserialization::testDeserializeQCborArray_data()
     QTest::newRow("string") << QJsonValue("abc123")      << QCborArray() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << QCborArray() << false;
 }
+#endif
 
 // Test: deserialize<QCborMap>() method ------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestDeserialization::testDeserializeQCborMap()
 {
     QFETCH(QJsonValue, input);
@@ -3410,9 +3422,11 @@ void TestDeserialization::testDeserializeQCborMap_data()
     QTest::newRow("string") << QJsonValue("abc123")     << QCborMap() << false;
     QTest::newRow("array")  << QJsonValue(QJsonArray()) << QCborMap() << false;
 }
+#endif
 
 // Test: deserialize<QCborSimpleType>() method -----------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestDeserialization::testDeserializeQCborSimpleType()
 {
     QFETCH(QJsonValue, input);
@@ -3448,6 +3462,7 @@ void TestDeserialization::testDeserializeQCborSimpleType_data()
     QTest::newRow("array")  << QJsonValue(QJsonArray())  << QCborSimpleType() << false;
     QTest::newRow("object") << QJsonValue(QJsonObject()) << QCborSimpleType() << false;
 }
+#endif
 
 // Test: deserialize<QPair>() method ---------------------------------------------------------------
 

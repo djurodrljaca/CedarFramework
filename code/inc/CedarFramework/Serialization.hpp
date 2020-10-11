@@ -223,21 +223,29 @@ CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonObject &value);
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QJsonDocument &value);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborValue &value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborArray &value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborMap &value);
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 //! \copydoc    CedarFramework::serialize()
 template<>
 CEDARFRAMEWORK_EXPORT QJsonValue serialize(const QCborSimpleType &value);
+#endif
 
 //! \copydoc    CedarFramework::serialize()
 template<typename T1, typename T2>

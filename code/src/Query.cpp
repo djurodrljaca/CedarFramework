@@ -24,6 +24,8 @@
 // Cedar Framework includes
 
 // Qt includes
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 #include <QtCore/QJsonValue>
 
 // System includes
@@ -67,16 +69,26 @@ bool hasNode(const QJsonValue &data, const QStringList &nodePath)
 
 QJsonValue getNode(const QJsonValue &data, const int index)
 {
+    if (!data.isArray())
+    {
+        return QJsonValue::Undefined;
+    }
+
     // Note: if sub-node is not found an Undefined value is returned
-    return data[index];
+    return data.toArray().at(index);
 }
 
 // -------------------------------------------------------------------------------------------------
 
 QJsonValue getNode(const QJsonValue &data, const QString &name)
 {
+    if (!data.isObject())
+    {
+        return QJsonValue::Undefined;
+    }
+
     // Note: if sub-node is not found an Undefined value is returned
-    return data[name];
+    return data.toObject().value(name);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -101,7 +113,7 @@ QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath)
                 }
 
                 // Note: if sub-node is not found an Undefined value is returned
-                node = node[index];
+                node = getNode(node, index);
                 break;
             }
 
@@ -114,7 +126,7 @@ QJsonValue getNode(const QJsonValue &data, const QVariantList &nodePath)
                 }
 
                 // Note: if sub-node is not found an Undefined value is returned
-                node = node[nodePathItem.toString()];
+                node = getNode(node, nodePathItem.toString());
                 break;
             }
 
@@ -151,14 +163,14 @@ QJsonValue getNode(const QJsonValue &data, const QStringList &nodePath)
                 }
 
                 // Note: if sub-node is not found an Undefined value is returned
-                node = node[index];
+                node = getNode(node, index);
                 break;
             }
 
             case QJsonValue::Object:
             {
                 // Note: if sub-node is not found an Undefined value is returned
-                node = node[nodePathItem];
+                node = getNode(node, nodePathItem);
                 break;
             }
 

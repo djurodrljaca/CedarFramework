@@ -22,12 +22,16 @@
 #include <CedarFramework/Serialization.hpp>
 
 // Qt includes
+#include <QtCore/QBitArray>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 #include <QtCore/QCborArray>
 #include <QtCore/QCborMap>
 #include <QtCore/QCborValue>
+#endif
 #include <QtCore/QDebug>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLine>
+#include <QtCore/QRegularExpression>
 #include <QtTest/QTest>
 
 // System includes
@@ -251,17 +255,25 @@ private slots:
     void testSerializeQJsonDocument();
     void testSerializeQJsonDocument_data();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testSerializeQCborValue();
     void testSerializeQCborValue_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testSerializeQCborArray();
     void testSerializeQCborArray_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testSerializeQCborMap();
     void testSerializeQCborMap_data();
+#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     void testSerializeQCborSimpleType();
     void testSerializeQCborSimpleType_data();
+#endif
 
     void testSerializeQPair();
     void testSerializeQPair_data();
@@ -665,41 +677,34 @@ void TestSerialization::testSerializeQBitArray_data()
     QTest::addColumn<QBitArray>("input");
     QTest::addColumn<QJsonValue>("expectedResult");
 
-    {
-        const QJsonObject expectedResult
-        {
-            { "bit_count",    0 },
-            { "encoded_bits", "" }
-        };
-        QTest::newRow("empty") << QBitArray() << QJsonValue(expectedResult);
-    }
+    QTest::newRow("empty") << QBitArray() << QJsonValue(QJsonArray());
 
     {
-        QBitArray input(30);
-        input.clearBit(0);
-        input.clearBit(1);
-        input.clearBit(2);
-        input.clearBit(3);
+        QBitArray input(16);
+        input.setBit(0);
+        input.setBit(1);
+        input.setBit(2);
+        input.setBit(3);
 
-        input.setBit(4);
-        input.setBit(5);
+        input.clearBit(4);
+        input.clearBit(5);
         input.clearBit(6);
         input.clearBit(7);
 
-        input.setBit(8);
+        input.clearBit(8);
         input.clearBit(9);
-        input.clearBit(10);
-        input.clearBit(11);
+        input.setBit(10);
+        input.setBit(11);
 
-        input.clearBit(12);
-        input.clearBit(13);
-        input.setBit(14);
+        input.setBit(12);
+        input.setBit(13);
+        input.clearBit(14);
         input.clearBit(15);
 
-        const QJsonObject expectedResult
+        const QJsonArray expectedResult
         {
-            { "bit_count",    30 },
-            { "encoded_bits", "MEEAAA==" }
+            1, 1, 1, 1, 0, 0, 0, 0,
+            0, 0, 1, 1, 1, 1, 0, 0
         };
         QTest::newRow("non-empty") << input << QJsonValue(expectedResult);
     }
@@ -949,31 +954,31 @@ void TestSerialization::testSerializeQVariant_data()
                                 << QJsonValue("YSB6IEEgWiAwIDkgKyAtID8=");
 
     {
-        QBitArray input(30);
-        input.clearBit(0);
-        input.clearBit(1);
-        input.clearBit(2);
-        input.clearBit(3);
+        QBitArray input(16);
+        input.setBit(0);
+        input.setBit(1);
+        input.setBit(2);
+        input.setBit(3);
 
-        input.setBit(4);
-        input.setBit(5);
+        input.clearBit(4);
+        input.clearBit(5);
         input.clearBit(6);
         input.clearBit(7);
 
-        input.setBit(8);
+        input.clearBit(8);
         input.clearBit(9);
-        input.clearBit(10);
-        input.clearBit(11);
+        input.setBit(10);
+        input.setBit(11);
 
-        input.clearBit(12);
-        input.clearBit(13);
-        input.setBit(14);
+        input.setBit(12);
+        input.setBit(13);
+        input.clearBit(14);
         input.clearBit(15);
 
-        const QJsonObject expectedResult
+        const QJsonArray expectedResult
         {
-            { "bit_count",    30 },
-            { "encoded_bits", "MEEAAA==" }
+            1, 1, 1, 1, 0, 0, 0, 0,
+            0, 0, 1, 1, 1, 1, 0, 0
         };
         QTest::newRow("QBitArray") << QVariant(input) << QJsonValue(expectedResult);
     }
@@ -1181,6 +1186,7 @@ void TestSerialization::testSerializeQVariant_data()
         QTest::newRow("QJsonDocument") << QVariant(QJsonDocument(value)) << QJsonValue(value);
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     QTest::newRow("QCborValue") << QVariant::fromValue(QCborValue("abc123"))
                                 << QJsonValue("abc123");
 
@@ -1205,6 +1211,7 @@ void TestSerialization::testSerializeQVariant_data()
 
     QTest::newRow("QCborSimpleType") << QVariant::fromValue(QCborSimpleType::True)
                                      << QJsonValue(true);
+#endif
 
     QTest::newRow("invalid") << QVariant() << QJsonValue(QJsonValue::Undefined);
 }
@@ -1841,6 +1848,7 @@ void TestSerialization::testSerializeQJsonDocument_data()
 
 // Test: serialize<QCborValue>() method ------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestSerialization::testSerializeQCborValue()
 {
     QFETCH(QCborValue, input);
@@ -1879,9 +1887,11 @@ void TestSerialization::testSerializeQCborValue_data()
         QTest::newRow("object") << QCborValue(value) << QJsonValue(value.toJsonObject());
     }
 }
+#endif
 
 // Test: serialize<QCborArray>() method ------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestSerialization::testSerializeQCborArray()
 {
     QFETCH(QCborArray, input);
@@ -1906,9 +1916,11 @@ void TestSerialization::testSerializeQCborArray_data()
         QTest::newRow("non-empty") << value << QJsonValue(value.toJsonArray());
     }
 }
+#endif
 
 // Test: serialize<QCborMap>() method --------------------------------------------------------------
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 void TestSerialization::testSerializeQCborMap()
 {
     QFETCH(QCborMap, input);
@@ -1957,6 +1969,7 @@ void TestSerialization::testSerializeQCborSimpleType_data()
     QTest::newRow("null")       << QCborSimpleType::Null       << QJsonValue();
     QTest::newRow("undefined")  << QCborSimpleType::Undefined  << QJsonValue(QJsonValue::Undefined);
 }
+#endif
 
 // Test: serialize<QPair>() method -----------------------------------------------------------------
 
