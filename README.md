@@ -36,13 +36,13 @@ $ cmake --build . --target install
 
 To use this module in a CMake project you need to build and deploy it. Then just add it as a package to your project's CMakeLists.txt:
 
-```
+```CMake
 find_package(CedarFramework REQUIRED)
 ```
 
 And link it to your target:
 
-```
+```CMake
 target_link_libraries(target_name PUBLIC CedarFramework::CedarFramework)
 ```
 
