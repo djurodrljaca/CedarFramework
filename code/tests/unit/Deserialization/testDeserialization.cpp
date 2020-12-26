@@ -914,9 +914,9 @@ void TestDeserialization::testDeserializeFloat_data()
     QTest::newRow("Double: min") << QJsonValue(std::numeric_limits<float>::lowest())
                                  << std::numeric_limits<float>::lowest()
                                  << true;
-    QTest::newRow("Double: -1.0") << QJsonValue(-1.0) << -1.0f << true;
-    QTest::newRow("Double:  0.0") << QJsonValue( 0.0) <<  0.0f << true;
-    QTest::newRow("Double: +1.0") << QJsonValue( 1.0) <<  1.0f << true;
+    QTest::newRow("Double: -1.0") << QJsonValue(-1.0) << -1.0F << true;
+    QTest::newRow("Double:  0.0") << QJsonValue( 0.0) <<  0.0F << true;
+    QTest::newRow("Double: +1.0") << QJsonValue( 1.0) <<  1.0F << true;
     QTest::newRow("Double: max") << QJsonValue(std::numeric_limits<float>::max())
                                  << std::numeric_limits<float>::max()
                                  << true;
@@ -925,9 +925,9 @@ void TestDeserialization::testDeserializeFloat_data()
             << QJsonValue(QString::number(std::numeric_limits<float>::lowest(), 0, 'f'))
             << std::numeric_limits<float>::lowest()
             << true;
-    QTest::newRow("String: -1.0") << QJsonValue("-1.0") << -1.0f << true;
-    QTest::newRow("String:  0.0") << QJsonValue("0.0") << 0.0f << true;
-    QTest::newRow("String: +1.0") << QJsonValue("1.0") << 1.0f << true;
+    QTest::newRow("String: -1.0") << QJsonValue("-1.0") << -1.0F << true;
+    QTest::newRow("String:  0.0") << QJsonValue("0.0") << 0.0F << true;
+    QTest::newRow("String: +1.0") << QJsonValue("1.0") << 1.0F << true;
     QTest::newRow("String: max")
             << QJsonValue(QString::number(std::numeric_limits<float>::max(), 0, 'f'))
             << std::numeric_limits<float>::max()
@@ -935,29 +935,29 @@ void TestDeserialization::testDeserializeFloat_data()
 
 
     // Negative tests
-    QTest::newRow("Null") << QJsonValue() << 0.0f << false;
+    QTest::newRow("Null") << QJsonValue() << 0.0F << false;
 
-    QTest::newRow("Bool: true") << QJsonValue(true) << 0.0f << false;
-    QTest::newRow("Bool: false") << QJsonValue(false) << 0.0f << false;
+    QTest::newRow("Bool: true") << QJsonValue(true) << 0.0F << false;
+    QTest::newRow("Bool: false") << QJsonValue(false) << 0.0F << false;
 
     QTest::newRow("Double: min * 2")
-            << QJsonValue(std::numeric_limits<float>::lowest() * 2.0) << 0.0f << false;
+            << QJsonValue(std::numeric_limits<float>::lowest() * 2.0) << 0.0F << false;
     QTest::newRow("Double: max * 2")
-            << QJsonValue(std::numeric_limits<float>::max() * 2.0) << 0.0f << false;
+            << QJsonValue(std::numeric_limits<float>::max() * 2.0) << 0.0F << false;
 
     QTest::newRow("String: min * 2")
             << QJsonValue(QString::number(std::numeric_limits<float>::lowest() * 2.0, 'f'))
-            << 0.0f
+            << 0.0F
             << false;
     QTest::newRow("String: max * 2")
             << QJsonValue(QString::number(std::numeric_limits<float>::max() * 2.0, 'f'))
-            << 0.0f
+            << 0.0F
             << false;
 
-    QTest::newRow("String: invalid") << QJsonValue("abc") << 0.0f << false;
+    QTest::newRow("String: invalid") << QJsonValue("abc") << 0.0F << false;
 
-    QTest::newRow("Array") << QJsonValue(QJsonArray()) << 0.0f << false;
-    QTest::newRow("Object") << QJsonValue(QJsonObject()) << 0.0f << false;
+    QTest::newRow("Array") << QJsonValue(QJsonArray()) << 0.0F << false;
+    QTest::newRow("Object") << QJsonValue(QJsonObject()) << 0.0F << false;
 }
 
 // Test: deserialize<double>() method --------------------------------------------------------------
@@ -1184,7 +1184,7 @@ void TestDeserialization::testDeserializeQBitArray_data()
         const QJsonArray input
         {
             1, 1, 1, 1, 0, 0, 0, 0,
-            "0", "0", "1", "1", 1.0, 1.0f, 0.0, 0.0f
+            "0", "0", "1", "1", 1.0, 1.0F, 0.0, 0.0F
         };
 
         QBitArray expectedResult(16);

@@ -563,9 +563,9 @@ void TestSerialization::testSerializeFloat_data()
 
     QTest::newRow("min") << std::numeric_limits<float>::lowest()
                          << QJsonValue(static_cast<double>(std::numeric_limits<float>::lowest()));
-    QTest::newRow("-1.0") << -1.0f << QJsonValue(-1.0);
-    QTest::newRow(" 0.0") <<  0.0f << QJsonValue( 0.0);
-    QTest::newRow("+1.0") <<  1.0f << QJsonValue( 1.0);
+    QTest::newRow("-1.0") << -1.0F << QJsonValue(-1.0);
+    QTest::newRow(" 0.0") <<  0.0F << QJsonValue( 0.0);
+    QTest::newRow("+1.0") <<  1.0F << QJsonValue( 1.0);
     QTest::newRow("max") << std::numeric_limits<float>::max()
                          << QJsonValue(static_cast<double>(std::numeric_limits<float>::max()));
 }

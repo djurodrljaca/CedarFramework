@@ -173,7 +173,7 @@ bool convertIntegerValue(const double inputValue, T_OUT *outputValue)
 // -------------------------------------------------------------------------------------------------
 
 template<typename T_OUT, IsMax32BitInteger<T_OUT> = true>
-bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
+bool convertIntegerValue(const QString &inputValue, T_OUT *outputValue)
 {
     // Through a signed integer
     {
@@ -205,7 +205,7 @@ bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
 // -------------------------------------------------------------------------------------------------
 
 template<typename T_OUT, Is64BitInteger<T_OUT> = true>
-bool convertIntegerValue(const QString inputValue, T_OUT *outputValue)
+bool convertIntegerValue(const QString &inputValue, T_OUT *outputValue)
 {
     // Through a signed integer
     {
@@ -1100,7 +1100,7 @@ bool deserialize(const QJsonValue &json, QRegularExpression *value)
 
     QRegularExpression::PatternOptions optionFlags;
 
-    for (const QString &item : options)
+    for (const QString &item : qAsConst(options))
     {
         if (!syntaxMap.contains(item))
         {
